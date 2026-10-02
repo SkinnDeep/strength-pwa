@@ -1,8 +1,9 @@
-const CACHE_NAME = 'strength-hiking-v1.0.0';
+const CACHE_NAME = 'strength-hiking-v1.1.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './styles.css',
+  './illustrations.js',
   './app.js',
   './manifest.webmanifest',
   './manifest.json',

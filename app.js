@@ -1,54 +1,65 @@
 /**
  * Strength for Family + Hiking PWA
- * Core Architecture & Application Logic
+ * Linear Progressive Workout Engine & Streamlined iOS Architecture
  */
 
 // =============================================================================
-// 1. DATA STRUCTURES & WORKOUT DEFINITIONS
+// 1. WORKOUT DEFINITIONS & EXERCISES
 // =============================================================================
 
-const WORKOUT_DATA = {
+const WORKOUT_PROGRAMS = {
   monday: {
     dayName: 'Monday',
     title: 'Monday Strength',
     subtitle: 'Squat • Smith Press • Row • RDL • Farmer Carry',
-    cardioTitle: 'Incline Treadmill Walk',
-    cardioSubtitle: '7 Minutes • Conversational Pace (Hands off rails)',
-    cardioDesc: 'Choose speed & incline allowing you to speak in complete sentences without holding the handrails.',
+    cardioName: 'Incline Treadmill Walk',
+    cardioIllustration: 'cardio_incline',
+    cardioCues: [
+      'Maintain conversational pace: speak in full sentences.',
+      'Hands off the handrails to build true hiking balance.'
+    ],
     exercises: [
       {
         id: 'mon_goblet_squat',
         name: 'Goblet Squat',
+        illustration: 'goblet_squat',
         defaultSets: 3,
         introSets: 2,
         repRange: '6–10',
         minReps: 6,
         maxReps: 10,
         defaultWeight: 45,
-        weightUnit: 'lb TOTAL',
+        weightUnit: 'lb total',
         stepWeight: 5,
         restSeconds: 120,
-        restLabel: 'Rest 2m',
-        notes: 'Start around 40–50 lb TOTAL. Keep chest tall, brace core. Rest 2 minutes.'
+        formCues: [
+          'Hold dumbbell vertically against chest with elbows tucked in.',
+          'Sit back & down between knees, chest tall. Finish with 2 good reps left.'
+        ]
       },
       {
         id: 'mon_smith_bench',
         name: 'Smith Bench Press',
+        illustration: 'smith_bench',
         defaultSets: 3,
         introSets: 2,
         repRange: '6–10',
         minReps: 6,
         maxReps: 10,
         defaultWeight: 85,
-        weightUnit: 'lb TOTAL',
+        weightUnit: 'lb total',
         stepWeight: 5,
         restSeconds: 120,
-        restLabel: 'Rest 2m',
-        notes: 'Try familiar 85 lb TOTAL only if controlled. Set Smith safety stops before lifting! Do 1 light practice set first.'
+        hasPracticeSet: true,
+        formCues: [
+          'Set Smith safety stops just above chest before lifting.',
+          'Lower with control to mid-chest; press up without flaring elbows.'
+        ]
       },
       {
         id: 'mon_cable_row',
         name: 'Cable Row',
+        illustration: 'cable_row',
         defaultSets: 2,
         introSets: 2,
         repRange: '8–12',
@@ -58,12 +69,15 @@ const WORKOUT_DATA = {
         weightUnit: 'lb',
         stepWeight: 5,
         restSeconds: 75,
-        restLabel: 'Rest 60–90s',
-        notes: 'Choose resistance leaving about 2 reps available (RIR 2). Pull toward abdomen, squeeze back.'
+        formCues: [
+          'Sit tall with chest proud; avoid swinging your torso.',
+          'Drive elbows back into ribcage; squeeze shoulder blades 1 second.'
+        ]
       },
       {
         id: 'mon_db_rdl',
         name: 'DB Romanian Deadlift',
+        illustration: 'db_rdl',
         defaultSets: 2,
         introSets: 2,
         repRange: '8–10',
@@ -73,24 +87,30 @@ const WORKOUT_DATA = {
         weightUnit: 'lb/hand',
         stepWeight: 5,
         restSeconds: 105,
-        restLabel: 'Rest 90–120s',
-        notes: 'Starting trial: 20–25 lb per hand. Learn hip hinge: soft knees, push hips backward.'
+        formCues: [
+          'Soft knees, push hips straight back into the wall behind you.',
+          'Keep dumbbells grazing shins; stop when hamstrings stretch.'
+        ]
       },
       {
         id: 'mon_farmer_carry',
         name: 'Farmer Carry',
+        illustration: 'farmer_carry',
         defaultSets: 2,
         introSets: 2,
         repRange: '30s',
         minReps: 30,
         maxReps: 45,
-        isCarry: true,
+        isTimed: true,
+        durationSeconds: 30,
         defaultWeight: 30,
         weightUnit: 'lb/hand',
         stepWeight: 5,
         restSeconds: 60,
-        restLabel: 'Rest 60s',
-        notes: 'Stay at DB rack. Walk holding DB in each hand (30–35 lb/hand), torso upright. Standing holds or slow marches fine if space is limited.'
+        formCues: [
+          'Stand tall like a string pulls your crown up; shoulders back.',
+          'Walk or march in place with deliberate, controlled steps.'
+        ]
       }
     ]
   },
@@ -98,13 +118,17 @@ const WORKOUT_DATA = {
     dayName: 'Wednesday',
     title: 'Wednesday Strength',
     subtitle: 'Split Squat • Seated OHP • Lat Pulldown • RDL • Pallof Press',
-    cardioTitle: 'Bike or Elliptical',
-    cardioSubtitle: '7 Minutes • Moderate Conversational Effort',
-    cardioDesc: 'Moderate effort: breathing harder, but still comfortably able to speak in full sentences.',
+    cardioName: 'Bike or Elliptical',
+    cardioIllustration: 'cardio_bike',
+    cardioCues: [
+      'Moderate effort: breathing harder, but still able to speak full sentences.',
+      'Maintain steady cadence (pedal or glide smoothly).'
+    ],
     exercises: [
       {
         id: 'wed_split_squat',
         name: 'Supported Split Squat',
+        illustration: 'split_squat',
         defaultSets: 2,
         introSets: 2,
         repRange: '8 / leg',
@@ -114,14 +138,15 @@ const WORKOUT_DATA = {
         weightUnit: 'bodyweight',
         stepWeight: 2.5,
         restSeconds: 120,
-        restLabel: 'Rest 2m after both legs',
-        notes: 'Bodyweight; hold fixed support. Lower in controlled 2–3s (builds downhill knee control for hiking!).',
-        substituteName: 'Goblet Squat (2 × 8)',
-        substituteActive: false
+        formCues: [
+          'Hold fixed support; lower slowly in 2–3s (builds downhill hiking control).',
+          'Front knee stays over mid-foot; push through front heel to rise.'
+        ]
       },
       {
         id: 'wed_seated_ohp',
         name: 'Seated DB Overhead Press',
+        illustration: 'seated_db_ohp',
         defaultSets: 3,
         introSets: 2,
         repRange: '6–10',
@@ -131,12 +156,16 @@ const WORKOUT_DATA = {
         weightUnit: 'lb/hand',
         stepWeight: 2.5,
         restSeconds: 120,
-        restLabel: 'Rest 2m',
-        notes: 'Starting trial: 15–20 lb per hand; use nearly upright backrest. Do 1 light practice set first.'
+        hasPracticeSet: true,
+        formCues: [
+          'Backrest nearly upright; brace core to avoid arching lower back.',
+          'Lower weights to ear level with elbows slightly angled forward.'
+        ]
       },
       {
         id: 'wed_lat_pulldown',
         name: 'Lat Pulldown (Two-Arm)',
+        illustration: 'lat_pulldown',
         defaultSets: 2,
         introSets: 2,
         repRange: '8–12',
@@ -146,14 +175,15 @@ const WORKOUT_DATA = {
         weightUnit: 'lb',
         stepWeight: 5,
         restSeconds: 75,
-        restLabel: 'Rest 60–90s',
-        notes: 'Pull elbows down toward sides, chest tall, without leaning way back.',
-        substituteName: 'Single-Arm Cable Pulldown (if station is busy)',
-        substituteActive: false
+        formCues: [
+          'Chest lifted high; pull elbows down toward your back pockets.',
+          'Control the return; avoid leaning way back or swinging.'
+        ]
       },
       {
         id: 'wed_db_rdl',
         name: 'DB Romanian Deadlift',
+        illustration: 'db_rdl',
         defaultSets: 2,
         introSets: 2,
         repRange: '8–10',
@@ -163,12 +193,15 @@ const WORKOUT_DATA = {
         weightUnit: 'lb/hand',
         stepWeight: 5,
         restSeconds: 105,
-        restLabel: 'Rest 90–120s',
-        notes: 'Starting trial: 20–25 lb per hand. Push hips back, keep back flat.'
+        formCues: [
+          'Soft knees, hinge hips back with a flat back.',
+          'Dumbbells glide down thighs to mid-shin level.'
+        ]
       },
       {
         id: 'wed_pallof_press',
         name: 'Pallof Press',
+        illustration: 'pallof_press',
         defaultSets: 2,
         introSets: 2,
         repRange: '8 / side',
@@ -178,8 +211,10 @@ const WORKOUT_DATA = {
         weightUnit: 'lb',
         stepWeight: 2.5,
         restSeconds: 60,
-        restLabel: 'Rest 60s after both sides',
-        notes: 'Stand sideways to chest-height cable. Press hands forward, hold 1–2s; resist rotation. Rest 60s after both sides.'
+        formCues: [
+          'Stand sideways to cable at chest height; knees soft, core braced.',
+          'Press forward, hold 1–2s, resisting rotation. Switch sides after 8 reps.'
+        ]
       }
     ]
   },
@@ -187,28 +222,35 @@ const WORKOUT_DATA = {
     dayName: 'Friday',
     title: 'Friday Strength',
     subtitle: 'Goblet Squat • Flat DB Bench • Single-Arm Row • Calf Raise • Suitcase Carry',
-    cardioTitle: 'Incline Treadmill Walk',
-    cardioSubtitle: '7 Minutes • Steady Conversational Pace',
-    cardioDesc: 'Comfortable, steady effort without holding the handrails.',
+    cardioName: 'Incline Treadmill Walk',
+    cardioIllustration: 'cardio_incline',
+    cardioCues: [
+      'Comfortable, steady effort without holding the handrails.',
+      'Incline builds glutes & calves for hiking uphill.'
+    ],
     exercises: [
       {
         id: 'fri_goblet_squat',
         name: 'Goblet Squat',
+        illustration: 'goblet_squat',
         defaultSets: 3,
         introSets: 2,
         repRange: '6–10',
         minReps: 6,
         maxReps: 10,
         defaultWeight: 45,
-        weightUnit: 'lb TOTAL',
+        weightUnit: 'lb total',
         stepWeight: 5,
         restSeconds: 120,
-        restLabel: 'Rest 2m',
-        notes: 'Start 40–50 lb TOTAL. Controlled descent. Rest 2 minutes.'
+        formCues: [
+          'Hold dumbbell vertically against chest; elbows tucked.',
+          'Sit between knees, chest tall. Stop with 2 reps in reserve.'
+        ]
       },
       {
         id: 'fri_flat_db_bench',
         name: 'Flat DB Bench Press',
+        illustration: 'flat_db_bench',
         defaultSets: 3,
         introSets: 2,
         repRange: '8–12',
@@ -218,12 +260,16 @@ const WORKOUT_DATA = {
         weightUnit: 'lb/hand',
         stepWeight: 2.5,
         restSeconds: 120,
-        restLabel: 'Rest 2m',
-        notes: 'Starting trial: 20–25 lb per hand. 1 light practice set first. Rest 2 minutes.'
+        hasPracticeSet: true,
+        formCues: [
+          'Feet planted firmly; dumbbells at 45° angle to torso (arrowhead).',
+          'Lower with control until dumbbells touch outer chest, press back up.'
+        ]
       },
       {
         id: 'fri_single_arm_row',
         name: 'Single-Arm DB Row',
+        illustration: 'single_arm_db_row',
         defaultSets: 2,
         introSets: 2,
         repRange: '8–12 / arm',
@@ -233,12 +279,15 @@ const WORKOUT_DATA = {
         weightUnit: 'lb/arm',
         stepWeight: 5,
         restSeconds: 75,
-        restLabel: 'Rest 60–90s after both arms',
-        notes: 'Starting trial: 30 lb (lighter if needed). Support non-working hand on bench. Rest after both arms.'
+        formCues: [
+          'Non-working hand & knee on bench, spine flat parallel to floor.',
+          'Pull dumbbell toward hip with elbow tight; avoid rotating torso.'
+        ]
       },
       {
         id: 'fri_calf_raise',
         name: 'Standing DB Calf Raise',
+        illustration: 'standing_db_calf_raise',
         defaultSets: 2,
         introSets: 2,
         repRange: '12–20',
@@ -248,25 +297,31 @@ const WORKOUT_DATA = {
         weightUnit: 'lb/hand',
         stepWeight: 5,
         restSeconds: 60,
-        restLabel: 'Rest 60s',
-        notes: 'Rise and lower slowly with a 1-second pause at the bottom stretch; use wall/rack support if needed.'
+        formCues: [
+          'Rise high on balls of big toes; hold peak contraction 1 second.',
+          'Lower slowly with a full 1-second pause at bottom stretch.'
+        ]
       },
       {
         id: 'fri_suitcase_carry',
         name: 'Suitcase Carry',
+        illustration: 'suitcase_carry',
         defaultSets: 2,
         introSets: 2,
         repRange: '30s / side',
         minReps: 30,
         maxReps: 45,
-        isCarry: true,
+        isTimed: true,
         isUnilateral: true,
+        durationSeconds: 30,
         defaultWeight: 25,
         weightUnit: 'lb (1 DB)',
         stepWeight: 5,
         restSeconds: 60,
-        restLabel: 'Rest 60s after both sides',
-        notes: 'Hold one DB (25–30 lb); walk or march slowly without leaning sideways. Switch hands, then rest 60s.'
+        formCues: [
+          'Hold 1 dumbbell on one side; keep shoulders and hips completely level.',
+          'Walk or march in place with deliberate balance. 30s side 1, then side 2.'
+        ]
       }
     ]
   }
@@ -277,11 +332,10 @@ const WORKOUT_DATA = {
 // =============================================================================
 
 const STORAGE_KEYS = {
-  STATE: 'sh_app_state_v1',
-  HISTORY: 'sh_workout_history_v1',
-  OUTDOOR: 'sh_outdoor_logs_v1',
-  PROGRESSION: 'sh_progression_tracker_v1',
-  SETTINGS: 'sh_settings_v1'
+  HISTORY: 'sh_workout_history_v2',
+  OUTDOOR: 'sh_outdoor_logs_v2',
+  PROGRESSION: 'sh_progression_tracker_v2',
+  PREFS: 'sh_user_prefs_v2'
 };
 
 let appState = {
@@ -292,31 +346,29 @@ let appState = {
   sessionActive: false,
   sessionStartTime: null,
   sessionElapsedSeconds: 0,
-  activeExerciseLogs: {} // key: exerciseId => array of { weight, reps, completed }
+  
+  // Linear Flow State
+  linearSteps: [],
+  currentStepIndex: 0,
+  isResting: false,
+  loggedStepData: {} // stepIndex => { weight, reps, completed }
 };
 
-let activeTimer = {
+let restTimer = {
   intervalId: null,
-  remainingSeconds: 90,
-  initialSeconds: 90,
-  label: 'Rest Period',
+  remainingSeconds: 0,
+  totalSeconds: 0,
   isRunning: false
 };
 
-let guidedStretchState = {
-  active: false,
-  stepIndex: 0,
-  steps: [
-    { title: 'Calf Stretch (Left Side)', duration: 30, cue: 'Hands against wall, back heel flat down on floor.' },
-    { title: 'Calf Stretch (Right Side)', duration: 30, cue: 'Switch legs, press right heel down.' },
-    { title: 'Hip Flexor (Left Forward)', duration: 30, cue: 'Staggered stance, tuck belt buckle UP, shift hips gently forward.' },
-    { title: 'Hip Flexor (Right Forward)', duration: 30, cue: 'Switch stance, maintain pelvic tuck.' },
-    { title: 'Chest Stretch (Both Arms)', duration: 45, cue: 'Forearms in doorway or corner, step gently forward to feel chest stretch.' }
-  ]
+let timedExerciseTimer = {
+  intervalId: null,
+  remainingSeconds: 0,
+  isRunning: false
 };
 
 // =============================================================================
-// 3. AUDIO SYNTHESIZER (Web Audio API - Zero External Dependencies)
+// 3. AUDIO SYNTHESIZER (Web Audio API)
 // =============================================================================
 
 let audioCtx = null;
@@ -324,9 +376,7 @@ let audioCtx = null;
 function getAudioContext() {
   if (!audioCtx) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (AudioContext) {
-      audioCtx = new AudioContext();
-    }
+    if (AudioContext) audioCtx = new AudioContext();
   }
   if (audioCtx && audioCtx.state === 'suspended') {
     audioCtx.resume();
@@ -334,7 +384,7 @@ function getAudioContext() {
   return audioCtx;
 }
 
-function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.2) {
+function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.25) {
   if (!appState.soundEnabled) return;
   try {
     const ctx = getAudioContext();
@@ -353,36 +403,22 @@ function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.2) {
 
     osc.start();
     osc.stop(ctx.currentTime + duration);
-  } catch (err) {
-    console.warn('Audio tone failed', err);
-  }
+  } catch (err) {}
 }
 
-// Countdown pip at 3, 2, 1
 function playPip() {
-  playTone(880, 'sine', 0.1, 0.25);
+  playTone(880, 'sine', 0.1, 0.3);
   if (navigator.vibrate) navigator.vibrate(50);
 }
 
-// Timer finished chime (C5 -> G5)
-function playRestFinishedChime() {
+function playFinishChime() {
   if (!appState.soundEnabled) return;
-  try {
-    const ctx = getAudioContext();
-    if (!ctx) return;
-    
-    // Note 1: C5
-    playTone(523.25, 'triangle', 0.25, 0.35);
-    // Note 2: E5
-    setTimeout(() => playTone(659.25, 'triangle', 0.25, 0.35), 140);
-    // Note 3: G5
-    setTimeout(() => playTone(783.99, 'triangle', 0.5, 0.4), 280);
-
-    if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
-  } catch (e) {}
+  playTone(523.25, 'triangle', 0.25, 0.35); // C5
+  setTimeout(() => playTone(659.25, 'triangle', 0.25, 0.35), 140); // E5
+  setTimeout(() => playTone(783.99, 'triangle', 0.5, 0.4), 280); // G5
+  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
 }
 
-// Workout complete celebratory fanfare
 function playFanfare() {
   if (!appState.soundEnabled) return;
   [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
@@ -392,7 +428,7 @@ function playFanfare() {
 }
 
 // =============================================================================
-// 4. SCREEN WAKE LOCK API (Prevents iPhone Auto-Lock)
+// 4. SCREEN WAKE LOCK
 // =============================================================================
 
 let wakeLockSentinel = null;
@@ -407,9 +443,7 @@ async function requestWakeLock() {
         appState.screenAwake = false;
         updateWakeLockButton();
       });
-    } catch (err) {
-      console.log('Wake Lock request error:', err);
-    }
+    } catch (e) {}
   }
 }
 
@@ -425,66 +459,36 @@ async function releaseWakeLock() {
 function updateWakeLockButton() {
   const btn = document.getElementById('wakeLockBtn');
   if (!btn) return;
-  if (appState.screenAwake) {
-    btn.classList.add('active');
-    btn.title = 'Screen Awake: ON';
-  } else {
-    btn.classList.remove('active');
-    btn.title = 'Screen Awake: OFF (tap to enable)';
-  }
+  btn.classList.toggle('active', appState.screenAwake);
 }
 
-// Re-acquire wake lock if tab is switched back
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && appState.sessionActive) {
-    requestWakeLock();
-  }
-});
-
 // =============================================================================
-// 5. SESSION TIMER & TIME BUDGET TRACKER (45 min target / 49 max)
+// 5. SESSION CLOCK & TIME BUDGET (45 min target / 49 max)
 // =============================================================================
 
 let sessionIntervalId = null;
 
-function startSessionTimer() {
+function startSessionClock() {
   if (appState.sessionActive) return;
   appState.sessionActive = true;
   appState.sessionStartTime = Date.now();
-  
   requestWakeLock();
   getAudioContext();
-
-  const startBtn = document.getElementById('startSessionBtn');
-  if (startBtn) {
-    startBtn.textContent = '⏹ End Session';
-    startBtn.style.background = 'rgba(244, 63, 94, 0.15)';
-    startBtn.style.borderColor = 'rgba(244, 63, 94, 0.4)';
-    startBtn.style.color = '#fda4af';
-  }
 
   sessionIntervalId = setInterval(updateSessionClock, 1000);
   updateSessionClock();
 }
 
-function stopSessionTimer() {
+function stopSessionClock() {
   if (sessionIntervalId) {
     clearInterval(sessionIntervalId);
     sessionIntervalId = null;
   }
   appState.sessionActive = false;
   releaseWakeLock();
-
-  const startBtn = document.getElementById('startSessionBtn');
-  if (startBtn) {
-    startBtn.textContent = '▶ Start Session';
-    startBtn.style.background = 'rgba(251, 191, 36, 0.15)';
-    startBtn.style.borderColor = 'rgba(251, 191, 36, 0.35)';
-    startBtn.style.color = 'var(--accent-amber)';
-  }
 }
 
-function formatMinutesSeconds(sec) {
+function formatMinSec(sec) {
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
@@ -496,438 +500,632 @@ function updateSessionClock() {
   appState.sessionElapsedSeconds = elapsed;
 
   const displayEl = document.getElementById('sessionTimerDisplay');
-  if (displayEl) displayEl.textContent = formatMinutesSeconds(elapsed);
-
-  // Time Budget bar calculations:
-  // Target: 45m (2700s), Max: 49m (2940s)
-  const targetSec = 2700;
-  const maxSec = 2940;
-  const percent = Math.min(100, (elapsed / targetSec) * 100);
-
-  const fillEl = document.getElementById('budgetBarFill');
-  if (fillEl) {
-    fillEl.style.width = `${percent}%`;
-    if (elapsed > maxSec) {
-      fillEl.className = 'budget-bar-fill danger';
-    } else if (elapsed > 2400) { // > 40 min
-      fillEl.className = 'budget-bar-fill warning';
+  if (displayEl) {
+    displayEl.textContent = formatMinSec(elapsed);
+    if (elapsed > 2940) { // > 49m cap
+      displayEl.style.color = 'var(--accent-rose)';
+    } else if (elapsed > 2400) { // > 40m
+      displayEl.style.color = 'var(--accent-amber)';
     } else {
-      fillEl.className = 'budget-bar-fill';
+      displayEl.style.color = '#fff';
     }
   }
 
-  // Active segment highlighting
-  const segWarmup = document.getElementById('segWarmup');
-  const segStrength = document.getElementById('segStrength');
-  const segCardio = document.getElementById('segCardio');
-  const segCooldown = document.getElementById('segCooldown');
+  // Update HUD progress bar
+  const totalSteps = appState.linearSteps.length || 1;
+  const progressPercent = Math.min(100, Math.round(((appState.currentStepIndex + 1) / totalSteps) * 100));
+  const hudFill = document.getElementById('hudProgressFill');
+  if (hudFill) hudFill.style.width = `${progressPercent}%`;
+}
 
-  [segWarmup, segStrength, segCardio, segCooldown].forEach(el => el && el.classList.remove('active'));
+// =============================================================================
+// 6. LINEAR STEP BUILDER (Unfolds Workout Into Step-by-Step Sequence)
+// =============================================================================
 
-  if (elapsed < 360) { // 0 - 6 min
-    if (segWarmup) segWarmup.classList.add('active');
-  } else if (elapsed < 1980) { // 6 - 33 min (Warmup 6 + Strength 27)
-    if (segStrength) segStrength.classList.add('active');
-  } else if (elapsed < 2400) { // 33 - 40 min (Cardio 7)
-    if (segCardio) segCardio.classList.add('active');
+function buildLinearSteps(dayKey, isIntroPhase) {
+  const program = WORKOUT_PROGRAMS[dayKey];
+  const steps = [];
+
+  // PHASE 1: WARMUP (3 Steps)
+  steps.push({
+    type: 'warmup_cardio',
+    phase: 'Warmup Phase • Step 1 of 3',
+    title: 'Easy Treadmill Walk or Bike',
+    illustration: 'warmup_cardio',
+    durationSeconds: 180,
+    isTimed: true,
+    targetDesc: '3:00 Easy Warmup',
+    formCues: [
+      'Gradually elevate heart rate and body temperature at a light, easy effort.',
+      'Breathe smoothly through nose or mouth; lubricate hips and ankles.'
+    ]
+  });
+
+  steps.push({
+    type: 'warmup_mobility',
+    phase: 'Warmup Phase • Step 2 of 3',
+    title: 'Dynamic Mobility Drill',
+    illustration: 'warmup_mobility',
+    targetDesc: '~1:00 Mobility Flow',
+    isChecklist: true,
+    formCues: [
+      '8 bodyweight squats & 8 unweighted hip hinges.',
+      '10 heel-to-toe rocks & 10 arm circles each direction.'
+    ]
+  });
+
+  steps.push({
+    type: 'warmup_practice',
+    phase: 'Warmup Phase • Step 3 of 3',
+    title: 'Light Practice Sets',
+    illustration: 'warmup_practice',
+    targetDesc: '1–2 Light Practice Sets',
+    isChecklist: true,
+    formCues: [
+      '1–2 light practice sets of your first strength movement.',
+      'Practice sets prepare your nervous system and do NOT count as working sets.'
+    ]
+  });
+
+  // PHASE 2: STRENGTH MOVEMENTS (Unfolded Set-by-Set)
+  program.exercises.forEach((ex, exIndex) => {
+    const numSets = isIntroPhase ? ex.introSets : ex.defaultSets;
+    const pastLog = getPastExerciseStats(ex.id);
+    const initialWeight = pastLog ? pastLog.weight : ex.defaultWeight;
+    const initialReps = pastLog ? pastLog.reps : ex.minReps;
+
+    // Additional practice set prompt before the first press
+    if (ex.hasPracticeSet) {
+      steps.push({
+        type: 'press_practice_set',
+        exerciseId: ex.id,
+        phase: `Strength Phase • Exercise ${exIndex + 1} of 5`,
+        title: `${ex.name} (Practice Set)`,
+        illustration: ex.illustration,
+        targetDesc: '1 Light Practice Set (Included in Strength Time)',
+        isChecklist: true,
+        formCues: [
+          'Warm up the pressing groove with a very light weight.',
+          'Practice sets do not count as working sets.'
+        ]
+      });
+    }
+
+    // Working Sets
+    for (let s = 1; s <= numSets; s++) {
+      steps.push({
+        type: 'working_set',
+        exerciseId: ex.id,
+        exerciseName: ex.name,
+        phase: `Strength Phase • Exercise ${exIndex + 1} of 5`,
+        title: ex.name,
+        setNumber: s,
+        totalSets: numSets,
+        illustration: ex.illustration,
+        repRange: ex.repRange,
+        minReps: ex.minReps,
+        maxReps: ex.maxReps,
+        weight: initialWeight,
+        weightUnit: ex.weightUnit,
+        stepWeight: ex.stepWeight,
+        reps: initialReps,
+        restSeconds: ex.restSeconds,
+        isTimed: !!ex.isTimed,
+        durationSeconds: ex.durationSeconds || 30,
+        isUnilateral: !!ex.isUnilateral,
+        targetDesc: `${s} of ${numSets} • Target: ${ex.repRange} ${ex.weightUnit}`,
+        formCues: ex.formCues
+      });
+    }
+  });
+
+  // PHASE 3: CARDIO (7 Minutes)
+  steps.push({
+    type: 'cardio',
+    phase: 'Cardio Phase',
+    title: program.cardioName,
+    illustration: program.cardioIllustration,
+    durationSeconds: 420,
+    isTimed: true,
+    targetDesc: '7:00 Moderate Intensity Cardio',
+    formCues: program.cardioCues
+  });
+
+  // PHASE 4: COOLDOWN (2m walk + 3m guided stretches)
+  steps.push({
+    type: 'cooldown_walk',
+    phase: 'Cooldown Phase • Step 1 of 4',
+    title: 'Gradual Slow-Down Walk',
+    illustration: 'cooldown_walk',
+    durationSeconds: 120,
+    isTimed: true,
+    targetDesc: '2:00 Easy Slow-Down',
+    formCues: [
+      'Gradually slow to an easy walk or pedal to return heart rate toward baseline.',
+      'Take deep diaphragmatic breaths.'
+    ]
+  });
+
+  steps.push({
+    type: 'cooldown_stretch',
+    phase: 'Cooldown Phase • Step 2 of 4',
+    title: 'Calf Stretch (Hands on Wall)',
+    illustration: 'stretch_calf',
+    durationSeconds: 60, // 30s L + 30s R
+    isTimed: true,
+    targetDesc: '30s Per Side (Back Heel Down)',
+    formCues: [
+      'Hands against wall, back heel flat on floor. Gentle tension only.',
+      'Do not bounce; breathe normally. Switch sides halfway (at 30s).'
+    ]
+  });
+
+  steps.push({
+    type: 'cooldown_stretch',
+    phase: 'Cooldown Phase • Step 3 of 4',
+    title: 'Hip Flexor Stretch',
+    illustration: 'stretch_hip_flexor',
+    durationSeconds: 60, // 30s L + 30s R
+    isTimed: true,
+    targetDesc: '30s Per Side (Supported Staggered Stance)',
+    formCues: [
+      'Supported staggered stance; gently tuck belt buckle UP and shift forward.',
+      'Feel stretch in front of rear hip. Switch sides at 30s.'
+    ]
+  });
+
+  steps.push({
+    type: 'cooldown_stretch',
+    phase: 'Cooldown Phase • Step 4 of 4',
+    title: 'Chest Stretch (Doorway / Corner)',
+    illustration: 'stretch_chest',
+    durationSeconds: 45,
+    isTimed: true,
+    targetDesc: '30–45s Gentle Chest Opener',
+    formCues: [
+      'Forearms against doorway or corner; step gently forward.',
+      'Keep chest tall, relax shoulders, breathe slowly.'
+    ]
+  });
+
+  return steps;
+}
+
+// =============================================================================
+// 7. LINEAR WORKOUT PLAYER LOGIC
+// =============================================================================
+
+function startLinearWorkout() {
+  appState.linearSteps = buildLinearSteps(appState.currentDay, appState.introPhase);
+  appState.currentStepIndex = 0;
+  appState.isResting = false;
+  appState.loggedStepData = {};
+
+  // Switch View
+  document.getElementById('homeSetupView').style.display = 'none';
+  document.getElementById('linearWorkoutView').classList.add('active');
+
+  startSessionClock();
+  renderCurrentStep();
+}
+
+function renderCurrentStep() {
+  const step = appState.linearSteps[appState.currentStepIndex];
+  if (!step) {
+    completeFullWorkout();
+    return;
+  }
+
+  // Ensure rest mode is off when rendering step
+  hideRestMode();
+
+  // Top HUD
+  document.getElementById('hudStepText').textContent = `Step ${appState.currentStepIndex + 1} of ${appState.linearSteps.length}`;
+  updateSessionClock();
+
+  // Main Card Elements
+  document.getElementById('stepPhaseLabel').textContent = step.phase;
+  document.getElementById('stepExerciseTitle').textContent = step.title;
+  
+  if (step.setNumber) {
+    document.getElementById('stepSetCounter').textContent = `Set ${step.setNumber} of ${step.totalSets}`;
+    document.getElementById('stepTargetReps').textContent = `Target: ${step.repRange} ${step.weightUnit ? `(${step.weightUnit})` : ''}`;
+    document.getElementById('stepSetCounter').style.display = 'inline-block';
   } else {
-    if (segCooldown) segCooldown.classList.add('active');
+    document.getElementById('stepSetCounter').style.display = 'none';
+    document.getElementById('stepTargetReps').textContent = step.targetDesc;
   }
 
-  // Pace warning banner check
-  const paceBanner = document.getElementById('pacingAlertBanner');
-  if (paceBanner) {
-    // If elapsed is > 30 mins and not yet at cardio/cooldown
-    if (elapsed >= 1800 && elapsed < targetSec) {
-      paceBanner.classList.add('visible');
-    } else if (elapsed >= targetSec) {
-      paceBanner.classList.add('visible');
-      paceBanner.querySelector('span').textContent = '🚨 Over 45 min target! Skip carry/core set to keep within 49m cap.';
-    } else {
-      paceBanner.classList.remove('visible');
-    }
+  // Illustration SVG
+  const illuBox = document.getElementById('illustrationContainer');
+  if (illuBox && window.EXERCISE_ILLUSTRATIONS) {
+    illuBox.innerHTML = window.EXERCISE_ILLUSTRATIONS[step.illustration] || window.EXERCISE_ILLUSTRATIONS.warmup_cardio;
+  }
+
+  // Form Cues (1-2 Bullets)
+  const cueList = document.getElementById('formCueList');
+  if (cueList) {
+    cueList.innerHTML = (step.formCues || []).map(cue => `<li>${cue}</li>`).join('');
+  }
+
+  // Differentiate between Lifting Set vs Timed Step vs Checklist Step
+  const liftingLogger = document.getElementById('liftingSetLogger');
+  const timedControls = document.getElementById('timedSetControls');
+  const completeBtn = document.getElementById('completeStepBtn');
+
+  if (step.type === 'working_set' && !step.isTimed) {
+    liftingLogger.style.display = 'grid';
+    timedControls.style.display = 'none';
+    completeBtn.style.display = 'flex';
+    completeBtn.innerHTML = '<span>✓ Complete Set</span>';
+
+    // Populate Weight / Reps values
+    const logged = appState.loggedStepData[appState.currentStepIndex];
+    const weightVal = logged ? logged.weight : step.weight;
+    const repsVal = logged ? logged.reps : step.reps;
+
+    document.getElementById('currentWeightInput').value = weightVal;
+    document.getElementById('currentRepsInput').value = repsVal;
+    document.getElementById('weightLabelCaption').textContent = `Weight (${step.weightUnit || 'lb'})`;
+  } else if (step.isTimed) {
+    liftingLogger.style.display = 'none';
+    timedControls.style.display = 'block';
+    completeBtn.style.display = 'none';
+
+    setupTimedStepCountdown(step.durationSeconds);
+  } else {
+    // Checklist step (Warmup / Mobility / Practice sets)
+    liftingLogger.style.display = 'none';
+    timedControls.style.display = 'none';
+    completeBtn.style.display = 'flex';
+    completeBtn.innerHTML = '<span>✓ Mark Completed & Next</span>';
+  }
+}
+
+// Steppers
+function stepCurrentWeight(delta) {
+  const input = document.getElementById('currentWeightInput');
+  const current = parseFloat(input.value) || 0;
+  const nextVal = Math.max(0, current + delta);
+  input.value = nextVal;
+  handleCurrentWeightChange(nextVal);
+}
+
+function handleCurrentWeightChange(val) {
+  const step = appState.linearSteps[appState.currentStepIndex];
+  if (!appState.loggedStepData[appState.currentStepIndex]) {
+    appState.loggedStepData[appState.currentStepIndex] = {};
+  }
+  appState.loggedStepData[appState.currentStepIndex].weight = parseFloat(val) || 0;
+  step.weight = parseFloat(val) || 0;
+}
+
+function stepCurrentReps(delta) {
+  const input = document.getElementById('currentRepsInput');
+  const current = parseInt(input.value, 10) || 0;
+  const nextVal = Math.max(1, current + delta);
+  input.value = nextVal;
+  handleCurrentRepsChange(nextVal);
+}
+
+function handleCurrentRepsChange(val) {
+  const step = appState.linearSteps[appState.currentStepIndex];
+  if (!appState.loggedStepData[appState.currentStepIndex]) {
+    appState.loggedStepData[appState.currentStepIndex] = {};
+  }
+  appState.loggedStepData[appState.currentStepIndex].reps = parseInt(val, 10) || 1;
+  step.reps = parseInt(val, 10) || 1;
+}
+
+// Complete Current Step
+function handleCompleteCurrentStep() {
+  const step = appState.linearSteps[appState.currentStepIndex];
+  if (!step) return;
+
+  // Log stats
+  const weight = parseFloat(document.getElementById('currentWeightInput').value) || step.weight || 0;
+  const reps = parseInt(document.getElementById('currentRepsInput').value, 10) || step.reps || 8;
+  
+  appState.loggedStepData[appState.currentStepIndex] = {
+    exerciseId: step.exerciseId,
+    weight,
+    reps,
+    completed: true
+  };
+
+  playTone(659.25, 'sine', 0.12, 0.25); // Set complete pip
+
+  // If this step has a rest period, show Rest Screen!
+  if (step.restSeconds && step.restSeconds > 0) {
+    showRestMode(step.restSeconds);
+  } else {
+    advanceToNextStep();
+  }
+}
+
+// Timed Exercises (Farmer carry, Cardio, Cooldown Stretches)
+function setupTimedStepCountdown(seconds) {
+  if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
+  timedExerciseTimer.remainingSeconds = seconds;
+  timedExerciseTimer.isRunning = false;
+
+  document.getElementById('timedCountdownDisplay').textContent = formatMinSec(seconds);
+  const btn = document.getElementById('timedActionBtn');
+  btn.textContent = `▶ Start ${formatMinSec(seconds)} Timer`;
+  btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+}
+
+function handleTimedActionClick() {
+  if (timedExerciseTimer.isRunning) {
+    // Pause
+    clearInterval(timedExerciseTimer.intervalId);
+    timedExerciseTimer.isRunning = false;
+    document.getElementById('timedActionBtn').textContent = '▶ Resume';
+  } else {
+    // Start
+    timedExerciseTimer.isRunning = true;
+    document.getElementById('timedActionBtn').textContent = '⏸ Pause';
+    playTone(587.33, 'sine', 0.1, 0.2);
+
+    timedExerciseTimer.intervalId = setInterval(() => {
+      if (timedExerciseTimer.remainingSeconds > 0) {
+        timedExerciseTimer.remainingSeconds--;
+
+        if (timedExerciseTimer.remainingSeconds <= 3 && timedExerciseTimer.remainingSeconds > 0) {
+          playPip();
+        }
+
+        document.getElementById('timedCountdownDisplay').textContent = formatMinSec(timedExerciseTimer.remainingSeconds);
+
+        if (timedExerciseTimer.remainingSeconds === 0) {
+          clearInterval(timedExerciseTimer.intervalId);
+          timedExerciseTimer.isRunning = false;
+          playFinishChime();
+          
+          const step = appState.linearSteps[appState.currentStepIndex];
+          if (step && step.restSeconds) {
+            showRestMode(step.restSeconds);
+          } else {
+            advanceToNextStep();
+          }
+        }
+      }
+    }, 1000);
   }
 }
 
 // =============================================================================
-// 6. REST & INTERVAL TIMER ENGINE
+// 8. REST MODE IN-PLACE SCREEN
 // =============================================================================
 
-function startRestTimer(seconds, label = 'Rest Period') {
-  if (activeTimer.intervalId) {
-    clearInterval(activeTimer.intervalId);
+function showRestMode(restDuration) {
+  appState.isResting = true;
+  document.getElementById('activeSetMode').style.display = 'none';
+  document.getElementById('restTimerMode').classList.add('active');
+
+  restTimer.remainingSeconds = restDuration;
+  restTimer.totalSeconds = restDuration;
+  restTimer.isRunning = true;
+
+  updateRestTimerDisplay();
+
+  // Preview Up Next
+  const nextStep = appState.linearSteps[appState.currentStepIndex + 1];
+  const previewEl = document.getElementById('restNextPreview');
+  if (nextStep) {
+    if (nextStep.type === 'working_set') {
+      previewEl.innerHTML = `Up Next: <strong>Set ${nextStep.setNumber} of ${nextStep.totalSets} — ${nextStep.title} (${nextStep.weight} lb)</strong>`;
+    } else {
+      previewEl.innerHTML = `Up Next: <strong>${nextStep.title}</strong>`;
+    }
+  } else {
+    previewEl.innerHTML = 'Up Next: <strong>Final Stretch & Completion!</strong>';
   }
 
-  activeTimer.remainingSeconds = seconds;
-  activeTimer.initialSeconds = seconds;
-  activeTimer.label = label;
-  activeTimer.isRunning = true;
+  if (restTimer.intervalId) clearInterval(restTimer.intervalId);
+  restTimer.intervalId = setInterval(() => {
+    if (restTimer.remainingSeconds > 0) {
+      restTimer.remainingSeconds--;
 
-  playTone(587.33, 'sine', 0.1, 0.2); // Start beep
-  updateTimerUI();
-
-  // Show floating banner
-  const banner = document.getElementById('floatingRestBanner');
-  if (banner) {
-    banner.classList.add('visible');
-    document.getElementById('restBannerTitle').textContent = label;
-  }
-
-  activeTimer.intervalId = setInterval(() => {
-    if (activeTimer.remainingSeconds > 0) {
-      activeTimer.remainingSeconds--;
-      
-      // Countdown pips at 3, 2, 1 seconds
-      if (activeTimer.remainingSeconds <= 3 && activeTimer.remainingSeconds > 0) {
+      if (restTimer.remainingSeconds <= 3 && restTimer.remainingSeconds > 0) {
         playPip();
       }
 
-      updateTimerUI();
+      updateRestTimerDisplay();
 
-      if (activeTimer.remainingSeconds === 0) {
-        clearInterval(activeTimer.intervalId);
-        activeTimer.isRunning = false;
-        playRestFinishedChime();
-        handleTimerFinish();
+      if (restTimer.remainingSeconds === 0) {
+        clearInterval(restTimer.intervalId);
+        restTimer.isRunning = false;
+        playFinishChime();
+        hideRestMode();
+        advanceToNextStep();
       }
     }
   }, 1000);
 }
 
-function handleTimerFinish() {
-  const bannerTitle = document.getElementById('restBannerTitle');
-  if (bannerTitle) bannerTitle.textContent = 'Time Up! Ready for Set';
-  
-  if (guidedStretchState.active) {
-    advanceGuidedStretch();
-  }
+function updateRestTimerDisplay() {
+  document.getElementById('restTimerBigDigits').textContent = formatMinSec(restTimer.remainingSeconds);
+  const btn = document.getElementById('restPlayPauseBtn');
+  if (btn) btn.textContent = restTimer.isRunning ? 'Pause' : 'Resume';
 }
 
-function updateTimerUI() {
-  const formatted = formatMinutesSeconds(activeTimer.remainingSeconds);
-  
-  // Floating Banner UI
-  const bannerDigits = document.getElementById('restTimerBannerDigits');
-  if (bannerDigits) bannerDigits.textContent = formatted;
-
-  // Dedicated Timer Tab UI
-  const heroDigits = document.getElementById('heroTimerDigits');
-  if (heroDigits) heroDigits.textContent = formatted;
-
-  const heroSub = document.getElementById('heroTimerSub');
-  if (heroSub) heroSub.textContent = activeTimer.label;
-
-  const heroBtn = document.getElementById('heroPlayPauseBtn');
-  if (heroBtn) {
-    heroBtn.textContent = activeTimer.isRunning ? 'Pause' : 'Resume';
-  }
-}
-
-function adjustActiveTimer(deltaSec) {
-  activeTimer.remainingSeconds = Math.max(0, activeTimer.remainingSeconds + deltaSec);
-  updateTimerUI();
-}
-
-function toggleHeroTimer() {
-  if (activeTimer.isRunning) {
-    clearInterval(activeTimer.intervalId);
-    activeTimer.isRunning = false;
-    updateTimerUI();
+function toggleRestTimerPlayPause() {
+  if (restTimer.isRunning) {
+    clearInterval(restTimer.intervalId);
+    restTimer.isRunning = false;
+    updateRestTimerDisplay();
   } else {
-    if (activeTimer.remainingSeconds <= 0) {
-      activeTimer.remainingSeconds = activeTimer.initialSeconds || 90;
-    }
-    startRestTimer(activeTimer.remainingSeconds, activeTimer.label);
+    if (restTimer.remainingSeconds <= 0) restTimer.remainingSeconds = 60;
+    showRestMode(restTimer.remainingSeconds);
   }
 }
 
-function resetActiveTimer() {
-  clearInterval(activeTimer.intervalId);
-  activeTimer.remainingSeconds = activeTimer.initialSeconds;
-  activeTimer.isRunning = false;
-  updateTimerUI();
+function adjustRestTimer(deltaSec) {
+  restTimer.remainingSeconds = Math.max(0, restTimer.remainingSeconds + deltaSec);
+  updateRestTimerDisplay();
 }
 
-function dismissRestTimer() {
-  if (activeTimer.intervalId) {
-    clearInterval(activeTimer.intervalId);
-  }
-  activeTimer.isRunning = false;
-  const banner = document.getElementById('floatingRestBanner');
-  if (banner) banner.classList.remove('visible');
+function skipRestTimer() {
+  if (restTimer.intervalId) clearInterval(restTimer.intervalId);
+  restTimer.isRunning = false;
+  hideRestMode();
+  advanceToNextStep();
 }
 
-function setAndStartTimer(seconds, label) {
-  startRestTimer(seconds, label);
+function hideRestMode() {
+  appState.isResting = false;
+  document.getElementById('restTimerMode').classList.remove('active');
+  document.getElementById('activeSetMode').style.display = 'block';
 }
 
-function startCustomTimer(seconds, label) {
-  startSessionTimer(); // Automatically start session if not already started
-  startRestTimer(seconds, label);
-}
-
-// Carry special timers (30s / 45s)
-function startCarryTimer(seconds, exerciseName, isUnilateral = false) {
-  startSessionTimer();
-  let label = `${exerciseName} (${seconds}s)`;
-  if (isUnilateral) label = `${exerciseName} - Side 1 (${seconds}s)`;
-  
-  startRestTimer(seconds, label);
-
-  // If unilateral (Suitcase carry), listen for end and prompt switch side
-  if (isUnilateral) {
-    // Custom audio indicator
-    setTimeout(() => {
-      // In 30s
-    }, seconds * 1000);
-  }
-}
-
-// Guided Stretch Routine Flow
-function startGuidedStretches() {
-  guidedStretchState.active = true;
-  guidedStretchState.stepIndex = 0;
-  startSessionTimer();
-  runCurrentStretchStep();
-}
-
-function runCurrentStretchStep() {
-  const step = guidedStretchState.steps[guidedStretchState.stepIndex];
-  if (!step) {
-    guidedStretchState.active = false;
-    playFanfare();
-    alert('🎉 Cooldown stretches complete! Great job maintaining hip and ankle mobility.');
-    return;
-  }
-
-  const label = `Stretch ${guidedStretchState.stepIndex + 1}/5: ${step.title}`;
-  startRestTimer(step.duration, label);
-  const subtitle = document.getElementById('restBannerSubtitle');
-  if (subtitle) subtitle.textContent = step.cue;
-}
-
-function advanceGuidedStretch() {
-  if (!guidedStretchState.active) return;
-  guidedStretchState.stepIndex++;
-  if (guidedStretchState.stepIndex < guidedStretchState.steps.length) {
-    setTimeout(runCurrentStretchStep, 1500); // 1.5s grace transition between stretches
+// Navigation
+function advanceToNextStep() {
+  if (appState.currentStepIndex < appState.linearSteps.length - 1) {
+    appState.currentStepIndex++;
+    renderCurrentStep();
   } else {
-    guidedStretchState.active = false;
+    completeFullWorkout();
   }
+}
+
+function stepPrevious() {
+  if (appState.isResting) hideRestMode();
+  if (appState.currentStepIndex > 0) {
+    appState.currentStepIndex--;
+    renderCurrentStep();
+  }
+}
+
+function stepNext() {
+  if (appState.isResting) hideRestMode();
+  advanceToNextStep();
 }
 
 // =============================================================================
-// 7. EXERCISE RENDERING & SET TRACKING
+// 9. OVERVIEW DRAWER & SKIP SET 5
 // =============================================================================
 
-function renderExercises() {
-  const dayKey = appState.currentDay;
-  const dayConfig = WORKOUT_DATA[dayKey];
-  const container = document.getElementById('exerciseListContainer');
-  if (!container || !dayConfig) return;
+function openOverviewModal() {
+  const container = document.getElementById('overviewStepList');
+  if (!container) return;
 
-  // Update header text
-  document.getElementById('dayTitleHeader').textContent = dayConfig.title;
-  document.getElementById('daySubtitleHeader').textContent = dayConfig.subtitle;
-  document.getElementById('cardioPhaseTitle').textContent = `Cardio (7 Minutes) — ${dayConfig.dayName}`;
-  document.getElementById('cardioPhaseSubtitle').textContent = dayConfig.cardioTitle;
-  document.getElementById('cardioMachineDesc').textContent = `7-min ${dayConfig.cardioTitle}`;
-  document.getElementById('cardioInstructions').textContent = dayConfig.cardioDesc;
-
-  const progressionData = getStoredProgression();
-
-  let html = '';
-
-  dayConfig.exercises.forEach((ex, exIdx) => {
-    const numSets = appState.introPhase ? ex.introSets : ex.defaultSets;
-    const isProgressionReady = progressionData[ex.id]?.consecutiveTopReps >= 2;
-
-    // Load active logs or defaults
-    if (!appState.activeExerciseLogs[ex.id]) {
-      const pastLog = getPastExerciseStats(ex.id);
-      const initialWeight = pastLog ? pastLog.weight : ex.defaultWeight;
-      const initialReps = pastLog ? pastLog.reps : (ex.minReps || 8);
-
-      appState.activeExerciseLogs[ex.id] = Array.from({ length: numSets }, () => ({
-        weight: initialWeight,
-        reps: initialReps,
-        completed: false
-      }));
-    } else {
-      // Adjust length if intro mode changed
-      while (appState.activeExerciseLogs[ex.id].length < numSets) {
-        const last = appState.activeExerciseLogs[ex.id][appState.activeExerciseLogs[ex.id].length - 1];
-        appState.activeExerciseLogs[ex.id].push({
-          weight: last ? last.weight : ex.defaultWeight,
-          reps: last ? last.reps : 8,
-          completed: false
-        });
-      }
-      if (appState.activeExerciseLogs[ex.id].length > numSets) {
-        appState.activeExerciseLogs[ex.id] = appState.activeExerciseLogs[ex.id].slice(0, numSets);
-      }
-    }
-
-    const sets = appState.activeExerciseLogs[ex.id];
-
-    html += `
-      <div class="exercise-card" id="card_${ex.id}">
-        <div class="exercise-top-row">
-          <div>
-            <div class="exercise-index">Exercise ${exIdx + 1} of 5</div>
-            <div class="exercise-name">${ex.name}</div>
-          </div>
-          <div class="rest-recommend-badge" onclick="startRestTimer(${ex.restSeconds}, 'Rest: ${ex.name}')">
-            ⏱️ ${ex.restLabel}
-          </div>
+  container.innerHTML = appState.linearSteps.map((step, idx) => {
+    const isCurrent = idx === appState.currentStepIndex;
+    const isDone = idx < appState.currentStepIndex;
+    return `
+      <div class="overview-step-item ${isCurrent ? 'active-step' : ''} ${isDone ? 'done-step' : ''}" onclick="jumpToStep(${idx})">
+        <div>
+          <span>${isDone ? '✓' : (idx + 1)}. ${step.title}</span>
+          ${step.setNumber ? `<span style="font-size: 0.72rem; color: var(--text-dim);"> (Set ${step.setNumber})</span>` : ''}
         </div>
-
-        <div class="exercise-instructions">
-          <strong>Target:</strong> ${numSets} × ${ex.repRange} ${ex.weightUnit ? `(${ex.weightUnit})` : ''} • ${ex.notes}
-        </div>
-
-        ${isProgressionReady ? `
-          <div class="progression-alert-pill visible">
-            🏆 <strong>Progression Ready!</strong> Hit top reps for 2 sessions. Add +${ex.stepWeight} lb and reset to ${ex.minReps} reps!
-          </div>
-        ` : ''}
-
-        ${ex.substituteName ? `
-          <div style="margin-bottom: 8px;">
-            <button class="rest-chip-btn" style="font-size: 0.72rem; padding: 4px 8px;" onclick="toggleSubstitute('${ex.id}')">
-              🔄 ${ex.substituteActive ? `Switch back to ${ex.name}` : `Substitute: ${ex.substituteName}`}
-            </button>
-          </div>
-        ` : ''}
-
-        <!-- Set Table -->
-        <div class="set-table">
-          <div class="set-table-header">
-            <span>Set</span>
-            <span style="text-align: center;">Weight (${ex.weightUnit.includes('TOTAL') ? 'Total' : 'Per Hand'})</span>
-            <span style="text-align: center;">${ex.isCarry ? 'Seconds' : 'Reps'}</span>
-            <span style="text-align: center;">Done</span>
-          </div>
-
-          ${sets.map((set, sIdx) => `
-            <div class="set-row ${set.completed ? 'completed' : ''}" id="row_${ex.id}_${sIdx}">
-              <div class="set-num-badge">#${sIdx + 1}</div>
-              
-              <!-- Weight Stepper -->
-              <div class="stepper-wrap">
-                <button class="stepper-btn" onclick="stepWeight('${ex.id}', ${sIdx}, -${ex.stepWeight})">−</button>
-                <input type="number" class="stepper-input" value="${set.weight}" 
-                  onchange="updateSetWeight('${ex.id}', ${sIdx}, this.value)" step="${ex.stepWeight}">
-                <button class="stepper-btn" onclick="stepWeight('${ex.id}', ${sIdx}, ${ex.stepWeight})">+</button>
-              </div>
-
-              <!-- Reps Stepper -->
-              <div class="stepper-wrap">
-                <button class="stepper-btn" onclick="stepReps('${ex.id}', ${sIdx}, -1)">−</button>
-                <input type="number" class="stepper-input" value="${set.reps}" 
-                  onchange="updateSetReps('${ex.id}', ${sIdx}, this.value)">
-                <button class="stepper-btn" onclick="stepReps('${ex.id}', ${sIdx}, 1)">+</button>
-              </div>
-
-              <!-- Complete Checkmark Button -->
-              <button class="check-set-btn" onclick="toggleSetComplete('${ex.id}', ${sIdx})">
-                ${set.completed ? '✓' : '○'}
-              </button>
-            </div>
-          `).join('')}
-        </div>
-
-        ${ex.isCarry ? `
-          <div class="carry-timer-box">
-            <div style="font-size: 0.76rem; color: var(--text-muted);">
-              <strong>Carry Timer:</strong> Build from 30s to 45s before adding weight.
-            </div>
-            <div class="carry-btn-row">
-              <button class="carry-trigger-btn" onclick="startCarryTimer(30, '${ex.name}', ${!!ex.isUnilateral})">
-                ⏱️ 30s Carry
-              </button>
-              <button class="carry-trigger-btn" onclick="startCarryTimer(45, '${ex.name}', ${!!ex.isUnilateral})">
-                ⏱️ 45s Carry
-              </button>
-            </div>
-          </div>
-        ` : ''}
+        <span style="font-size: 0.75rem;">${isCurrent ? '▶ Current' : ''}</span>
       </div>
     `;
+  }).join('');
+
+  openModal('overviewModal');
+}
+
+function jumpToStep(idx) {
+  if (appState.isResting) hideRestMode();
+  appState.currentStepIndex = idx;
+  closeModal('overviewModal');
+  renderCurrentStep();
+}
+
+function skipFinalCarrySet() {
+  // Find steps for exercise 5 (Farmer carry / Suitcase carry / Pallof press)
+  const initialLength = appState.linearSteps.length;
+  appState.linearSteps = appState.linearSteps.filter((step, idx) => {
+    // Keep warmup, cardio, cooldown, and exercises 1 to 4
+    if (step.phase && step.phase.includes('Exercise 5 of 5')) {
+      return false; // Skip!
+    }
+    return true;
   });
 
-  container.innerHTML = html;
-}
-
-// Steppers and inputs
-function stepWeight(exId, setIdx, delta) {
-  const set = appState.activeExerciseLogs[exId][setIdx];
-  set.weight = Math.max(0, (parseFloat(set.weight) || 0) + delta);
-  renderExercises();
-}
-
-function updateSetWeight(exId, setIdx, val) {
-  const set = appState.activeExerciseLogs[exId][setIdx];
-  set.weight = Math.max(0, parseFloat(val) || 0);
-}
-
-function stepReps(exId, setIdx, delta) {
-  const set = appState.activeExerciseLogs[exId][setIdx];
-  set.reps = Math.max(1, (parseInt(set.reps, 10) || 0) + delta);
-  renderExercises();
-}
-
-function updateSetReps(exId, setIdx, val) {
-  const set = appState.activeExerciseLogs[exId][setIdx];
-  set.reps = Math.max(1, parseInt(val, 10) || 1);
-}
-
-function toggleSetComplete(exId, setIdx) {
-  startSessionTimer(); // Ensure clock is running
-  const set = appState.activeExerciseLogs[exId][setIdx];
-  set.completed = !set.completed;
-
-  if (set.completed) {
-    playTone(659.25, 'sine', 0.12, 0.25);
-    // Find exercise config to start rest timer
-    const dayConfig = WORKOUT_DATA[appState.currentDay];
-    const ex = dayConfig.exercises.find(e => e.id === exId);
-    if (ex) {
-      startRestTimer(ex.restSeconds, `Rest: ${ex.name} (Set ${setIdx + 1})`);
-    }
+  closeModal('overviewModal');
+  alert('Set 5 skipped to preserve your 45-minute target! Advancing smoothly.');
+  if (appState.currentStepIndex >= appState.linearSteps.length) {
+    appState.currentStepIndex = appState.linearSteps.length - 1;
   }
-
-  renderExercises();
+  renderCurrentStep();
 }
 
-function toggleSubstitute(exId) {
-  const dayConfig = WORKOUT_DATA[appState.currentDay];
-  const ex = dayConfig.exercises.find(e => e.id === exId);
-  if (ex) {
-    ex.substituteActive = !ex.substituteActive;
-    if (ex.substituteActive) {
-      ex.name = ex.substituteName;
-    } else {
-      // revert
-      if (exId === 'wed_split_squat') ex.name = 'Supported Split Squat';
-      if (exId === 'wed_lat_pulldown') ex.name = 'Lat Pulldown (Two-Arm)';
-    }
-    renderExercises();
+function confirmExitWorkout() {
+  if (confirm('Exit active workout? Session time will be stopped.')) {
+    stopSessionClock();
+    hideRestMode();
+    document.getElementById('linearWorkoutView').classList.remove('active');
+    document.getElementById('homeSetupView').style.display = 'block';
   }
 }
 
 // =============================================================================
-// 8. PROGRESSION SYSTEM & LOGGING
+// 10. WORKOUT COMPLETION & DOUBLE PROGRESSION LOGIC
 // =============================================================================
+
+function completeFullWorkout() {
+  stopSessionClock();
+  playFanfare();
+
+  const program = WORKOUT_PROGRAMS[appState.currentDay];
+  const totalMins = Math.round(appState.sessionElapsedSeconds / 60) || 45;
+  const now = new Date();
+
+  // Save Session
+  const sessionRecord = {
+    id: `workout_${Date.now()}`,
+    date: now.toISOString(),
+    displayDate: now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+    day: program.dayName,
+    durationMinutes: totalMins,
+    introPhase: appState.introPhase,
+    stepsCompleted: appState.linearSteps.length
+  };
+
+  const history = getStoredHistory();
+  history.push(sessionRecord);
+  localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
+
+  // Evaluate Double Progression
+  const progression = getStoredProgression();
+  program.exercises.forEach(ex => {
+    // Find all logged working sets for this exercise
+    const sets = Object.values(appState.loggedStepData).filter(s => s && s.exerciseId === ex.id && s.completed);
+    if (sets.length > 0) {
+      const allTopReps = sets.every(s => s.reps >= ex.maxReps);
+      const currWeight = sets[0].weight;
+
+      if (!progression[ex.id]) {
+        progression[ex.id] = { name: ex.name, currentWeight: currWeight, consecutiveTopReps: 0 };
+      }
+      progression[ex.id].currentWeight = currWeight;
+
+      if (allTopReps) {
+        progression[ex.id].consecutiveTopReps = (progression[ex.id].consecutiveTopReps || 0) + 1;
+      } else {
+        progression[ex.id].consecutiveTopReps = 0;
+      }
+    }
+  });
+  saveProgressionData(progression);
+
+  alert(`🎉 Workout Complete!\n• Time: ${totalMins} minutes (Target 45m)\n• All exercises logged to history.`);
+
+  // Return to clean home view
+  document.getElementById('linearWorkoutView').classList.remove('active');
+  document.getElementById('homeSetupView').style.display = 'block';
+  renderHomeExercisePreview();
+  renderHistoryTab();
+  updateWeeklyCardioStats();
+}
 
 function getPastExerciseStats(exId) {
-  const history = getStoredHistory();
-  for (let i = history.length - 1; i >= 0; i--) {
-    const session = history[i];
-    if (session.exercises && session.exercises[exId]) {
-      const sets = session.exercises[exId];
-      if (sets.length > 0) return sets[0];
-    }
+  const prog = getStoredProgression();
+  if (prog[exId]) {
+    return { weight: prog[exId].currentWeight, reps: 8 };
   }
   return null;
 }
@@ -952,75 +1150,51 @@ function getStoredHistory() {
   }
 }
 
-function saveWorkoutToHistory() {
-  const dayConfig = WORKOUT_DATA[appState.currentDay];
-  const durationSec = appState.sessionElapsedSeconds || 2700; // default 45m if not started
-  const now = new Date();
+// =============================================================================
+// 11. HOME SETUP PREVIEW & TABS
+// =============================================================================
 
-  const sessionRecord = {
-    id: `workout_${Date.now()}`,
-    date: now.toISOString(),
-    displayDate: now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
-    day: dayConfig.dayName,
-    durationSeconds: durationSec,
-    durationMinutes: Math.round(durationSec / 60),
-    introPhase: appState.introPhase,
-    exercises: JSON.parse(JSON.stringify(appState.activeExerciseLogs))
-  };
+function renderHomeExercisePreview() {
+  const program = WORKOUT_PROGRAMS[appState.currentDay];
+  if (!program) return;
 
-  // Evaluate double progression for each exercise
-  const progression = getStoredProgression();
+  document.getElementById('homeDayTitle').textContent = `${program.dayName} Strength`;
 
-  dayConfig.exercises.forEach(ex => {
-    const sets = appState.activeExerciseLogs[ex.id] || [];
-    const completedSets = sets.filter(s => s.completed);
+  const container = document.getElementById('homeExercisePreview');
+  if (container) {
+    container.innerHTML = program.exercises.map((ex, i) => {
+      const sets = appState.introPhase ? ex.introSets : ex.defaultSets;
+      return `
+        <div class="preview-row">
+          <span>${i + 1}. <strong>${ex.name}</strong></span>
+          <span style="font-size: 0.78rem; color: var(--accent-sky);">${sets} × ${ex.repRange}</span>
+        </div>
+      `;
+    }).join('');
+  }
+}
 
-    if (completedSets.length > 0) {
-      // Check if all completed sets hit max reps
-      const allHitMax = completedSets.every(s => s.reps >= ex.maxReps);
-      const currWeight = completedSets[0].weight;
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  const target = document.getElementById(`tab-${tabId}`);
+  if (target) target.classList.add('active');
 
-      if (!progression[ex.id]) {
-        progression[ex.id] = {
-          name: ex.name,
-          currentWeight: currWeight,
-          consecutiveTopReps: 0,
-          lastUpdated: now.toISOString()
-        };
-      }
+  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = Array.from(document.querySelectorAll('.nav-item')).find(btn => 
+    btn.getAttribute('onclick')?.includes(`'${tabId}'`)
+  );
+  if (activeBtn) activeBtn.classList.add('active');
 
-      progression[ex.id].currentWeight = currWeight;
-
-      if (allHitMax) {
-        progression[ex.id].consecutiveTopReps = (progression[ex.id].consecutiveTopReps || 0) + 1;
-      } else {
-        progression[ex.id].consecutiveTopReps = 0;
-      }
-    }
-  });
-
-  saveProgressionData(progression);
-
-  const history = getStoredHistory();
-  history.push(sessionRecord);
-  localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
-
-  // Reset active state
-  stopSessionTimer();
-  dismissRestTimer();
-  appState.sessionElapsedSeconds = 0;
-  appState.activeExerciseLogs = {};
-
-  playFanfare();
-  alert(`🎉 Workout Saved! Session time: ${sessionRecord.durationMinutes} minutes. Progression updated!`);
-
-  renderExercises();
-  renderProgressTab();
-  updateWeeklyCardioStats();
+  if (tabId === 'hiking') {
+    renderOutdoorLogs();
+    updateWeeklyCardioStats();
+  } else if (tabId === 'history') {
+    renderHistoryTab();
+  }
 }
 
 // =============================================================================
-// 9. OUTDOOR HIKING & CARDIO TRACKER (150-Min Weekly Target)
+// 12. OUTDOOR CARDIO & 150-MIN WEEKLY GOAL
 // =============================================================================
 
 function getStoredOutdoorLogs() {
@@ -1047,7 +1221,7 @@ function handleOutdoorLogSubmit(e) {
     type,
     durationMinutes: duration,
     elevationGain: elevation,
-    packWeight: packWeight
+    packWeight
   };
 
   const logs = getStoredOutdoorLogs();
@@ -1061,24 +1235,17 @@ function handleOutdoorLogSubmit(e) {
   updateWeeklyCardioStats();
 }
 
-function getStartOfWeek() {
+function updateWeeklyCardioStats() {
   const d = new Date();
   const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday is start of week
-  const start = new Date(d.setDate(diff));
-  start.setHours(0, 0, 0, 0);
-  return start;
-}
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const weekStart = new Date(d.setDate(diff));
+  weekStart.setHours(0, 0, 0, 0);
 
-function updateWeeklyCardioStats() {
-  const weekStart = getStartOfWeek();
-  
-  // 1. Gym cardio: 7 min per gym session completed this week
   const history = getStoredHistory();
   const gymSessionsThisWeek = history.filter(h => new Date(h.date) >= weekStart).length;
   const gymCardioMins = gymSessionsThisWeek * 7;
 
-  // 2. Outdoor cardio
   const outdoorLogs = getStoredOutdoorLogs();
   const outdoorMins = outdoorLogs
     .filter(log => new Date(log.date) >= weekStart)
@@ -1103,8 +1270,11 @@ function updateWeeklyCardioStats() {
   const remainEl = document.getElementById('cardioRemainingLabel');
   if (remainEl) {
     const left = Math.max(0, target - totalCardio);
-    remainEl.textContent = left > 0 ? `${left}m left` : '🎉 Goal Met!';
+    remainEl.textContent = left > 0 ? `${left}m left` : '🎉 150m Goal Met!';
   }
+
+  const miniEl = document.getElementById('homeCardioMiniStat');
+  if (miniEl) miniEl.textContent = `${totalCardio} / 150m`;
 }
 
 function renderOutdoorLogs() {
@@ -1133,59 +1303,31 @@ function renderOutdoorLogs() {
 }
 
 // =============================================================================
-// 10. PROGRESS TAB & HISTORY VIEW
+// 13. HISTORY & BACKUP
 // =============================================================================
 
-function renderProgressTab() {
-  // 1. Current working weights
-  const progression = getStoredProgression();
-  const grid = document.getElementById('progressionStatsGrid');
-  if (grid) {
-    const entries = Object.entries(progression);
-    if (entries.length === 0) {
-      grid.innerHTML = '<p style="font-size: 0.8rem; color: var(--text-dim); text-align: center; padding: 10px;">Log your first session to initialize progression weights.</p>';
-    } else {
-      grid.innerHTML = entries.map(([id, info]) => `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-          <div>
-            <div style="font-size: 0.84rem; font-weight: 600; color: #fff;">${info.name || id}</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted);">
-              Top-rep streak: ${info.consecutiveTopReps} / 2 sessions
-            </div>
-          </div>
-          <div style="font-size: 0.95rem; font-weight: 700; color: var(--accent-sky);">
-            ${info.currentWeight} lb
-          </div>
-        </div>
-      `).join('');
-    }
-  }
-
-  // 2. Workout History List
+function renderHistoryTab() {
   const history = getStoredHistory();
-  const historyContainer = document.getElementById('workoutHistoryList');
-  if (historyContainer) {
-    if (history.length === 0) {
-      historyContainer.innerHTML = '<p style="font-size: 0.8rem; color: var(--text-dim); text-align: center; padding: 14px;">No completed workouts yet.</p>';
-    } else {
-      historyContainer.innerHTML = history.slice().reverse().map(h => `
-        <div style="background: var(--bg-input); padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 8px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <strong style="color: #fff; font-size: 0.88rem;">${h.day} Workout</strong>
-            <span style="color: var(--accent-emerald); font-weight: 700; font-size: 0.84rem;">${h.durationMinutes} min</span>
-          </div>
-          <div style="font-size: 0.74rem; color: var(--text-muted);">
-            ${h.displayDate} • ${h.introPhase ? 'Intro Phase (2 sets)' : 'Full 3 Sets'}
-          </div>
-        </div>
-      `).join('');
-    }
-  }
-}
+  const container = document.getElementById('workoutHistoryList');
+  if (!container) return;
 
-// =============================================================================
-// 11. BACKUP & RESTORE (JSON EXPORT/IMPORT)
-// =============================================================================
+  if (history.length === 0) {
+    container.innerHTML = '<p style="font-size: 0.8rem; color: var(--text-dim); text-align: center; padding: 14px;">No completed workouts yet.</p>';
+    return;
+  }
+
+  container.innerHTML = history.slice().reverse().map(h => `
+    <div style="background: var(--bg-input); padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <strong style="color: #fff; font-size: 0.88rem;">${h.day} Workout</strong>
+        <span style="color: var(--accent-emerald); font-weight: 700; font-size: 0.84rem;">${h.durationMinutes} min</span>
+      </div>
+      <div style="font-size: 0.74rem; color: var(--text-muted);">
+        ${h.displayDate} • ${h.introPhase ? 'Intro Phase (2 sets)' : 'Full 3 Sets'}
+      </div>
+    </div>
+  `).join('');
+}
 
 function exportDataJSON() {
   const exportPayload = {
@@ -1194,7 +1336,6 @@ function exportDataJSON() {
     progression: getStoredProgression(),
     exportedAt: new Date().toISOString()
   };
-
   const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1211,7 +1352,6 @@ function triggerImportFileInput() {
 function handleFileImport(e) {
   const file = e.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = (event) => {
     try {
@@ -1219,122 +1359,73 @@ function handleFileImport(e) {
       if (data.history) localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(data.history));
       if (data.outdoor) localStorage.setItem(STORAGE_KEYS.OUTDOOR, JSON.stringify(data.outdoor));
       if (data.progression) localStorage.setItem(STORAGE_KEYS.PROGRESSION, JSON.stringify(data.progression));
-      alert('✅ Backup data restored successfully!');
-      renderProgressTab();
-      renderOutdoorLogs();
+      alert('✅ Backup restored successfully!');
+      renderHistoryTab();
       updateWeeklyCardioStats();
     } catch (err) {
-      alert('❌ Error reading backup file. Please ensure it is valid JSON.');
+      alert('❌ Error reading backup file.');
     }
   };
   reader.readAsText(file);
 }
 
-function confirmResetAllData() {
-  if (confirm('Are you sure you want to reset all workout and hike logs? This cannot be undone.')) {
-    localStorage.clear();
-    location.reload();
-  }
+// Modals
+function openModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.add('active');
 }
 
-// =============================================================================
-// 12. UI NAVIGATION & MODALS
-// =============================================================================
-
-function switchTab(tabId) {
-  // Update tabs
-  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-  const target = document.getElementById(`tab-${tabId}`);
-  if (target) target.classList.add('active');
-
-  // Update nav buttons
-  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-  const activeBtn = Array.from(document.querySelectorAll('.nav-item')).find(btn => 
-    btn.getAttribute('onclick')?.includes(`'${tabId}'`)
-  );
-  if (activeBtn) activeBtn.classList.add('active');
-
-  if (tabId === 'hiking') {
-    renderOutdoorLogs();
-    updateWeeklyCardioStats();
-  } else if (tabId === 'progress') {
-    renderProgressTab();
-  }
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.remove('active');
 }
 
-function togglePhaseCard(cardId) {
-  const card = document.getElementById(cardId);
-  if (card) card.classList.toggle('open');
-}
-
-function toggleCheckItem(el) {
-  el.classList.toggle('checked');
-  playTone(523.25, 'sine', 0.08, 0.2);
-}
-
-function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.add('active');
-}
-
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.remove('active');
-}
-
-function closeModalOnOutsideClick(event, modalId) {
-  if (event.target.id === modalId) {
-    closeModal(modalId);
-  }
+function closeModalOnOutsideClick(e, id) {
+  if (e.target.id === id) closeModal(id);
 }
 
 function openHostingGuideModal() {
   openModal('hostingModal');
 }
 
-// Auto-select Day based on Day of Week
+// Auto-detect day of week
 function autoDetectDay() {
-  const day = new Date().getDay(); // 0 Sun, 1 Mon, 2 Tue, 3 Wed, 4 Thu, 5 Fri, 6 Sat
+  const day = new Date().getDay();
   if (day === 3 || day === 4) return 'wednesday';
   if (day === 5 || day === 6 || day === 0) return 'friday';
   return 'monday';
 }
 
 // =============================================================================
-// 13. INITIALIZATION & EVENT LISTENERS
+// 14. APP INITIALIZATION
 // =============================================================================
 
 window.addEventListener('DOMContentLoaded', () => {
-  // 1. Initial day setup
   appState.currentDay = autoDetectDay();
 
   // Day buttons
   document.querySelectorAll('.day-tab-btn').forEach(btn => {
     const day = btn.getAttribute('data-day');
-    if (day === appState.currentDay) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
+    btn.classList.toggle('active', day === appState.currentDay);
 
     btn.addEventListener('click', () => {
       document.querySelectorAll('.day-tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       appState.currentDay = day;
-      renderExercises();
+      renderHomeExercisePreview();
     });
   });
 
-  // 2. Intro phase toggle
+  // Intro toggle
   const introToggle = document.getElementById('introPhaseToggle');
   if (introToggle) {
     introToggle.addEventListener('change', (e) => {
       appState.introPhase = e.target.checked;
-      renderExercises();
+      renderHomeExercisePreview();
     });
   }
 
-  // 3. Sound toggle button
+  // Sound toggle
   const soundBtn = document.getElementById('soundToggleBtn');
   if (soundBtn) {
     soundBtn.addEventListener('click', () => {
@@ -1345,66 +1436,29 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Wake lock button
+  // Wake lock
   const wakeBtn = document.getElementById('wakeLockBtn');
   if (wakeBtn) {
     wakeBtn.addEventListener('click', () => {
-      if (appState.screenAwake) {
-        releaseWakeLock();
-      } else {
-        requestWakeLock();
-      }
+      if (appState.screenAwake) releaseWakeLock();
+      else requestWakeLock();
     });
   }
 
-  // 5. Info modal button
+  // Info modal
   const infoBtn = document.getElementById('infoModalBtn');
   if (infoBtn) {
     infoBtn.addEventListener('click', () => openModal('infoModal'));
   }
 
-  // 6. Session start/stop
-  const sessionBtn = document.getElementById('startSessionBtn');
-  if (sessionBtn) {
-    sessionBtn.addEventListener('click', () => {
-      if (appState.sessionActive) {
-        if (confirm('End session timer?')) stopSessionTimer();
-      } else {
-        startSessionTimer();
-      }
-    });
-  }
-
-  // 7. Complete Workout
-  const finishBtn = document.getElementById('finishWorkoutBtn');
-  if (finishBtn) {
-    finishBtn.addEventListener('click', saveWorkoutToHistory);
-  }
-
-  // 8. Skip set 5 banner button (for tight schedule per protocol)
-  const skipCarryBtn = document.getElementById('skipCarryBannerBtn');
-  if (skipCarryBtn) {
-    skipCarryBtn.addEventListener('click', () => {
-      const card = document.querySelector('.exercise-card:last-of-type');
-      if (card) {
-        card.style.display = 'none';
-        alert('Set 5 skipped to preserve 45-minute budget. Good prioritization!');
-      }
-    });
-  }
-
-  // 9. Initial rendering
-  renderExercises();
-  renderProgressTab();
+  // Initial renders
+  renderHomeExercisePreview();
+  renderHistoryTab();
   renderOutdoorLogs();
   updateWeeklyCardioStats();
 
-  // 10. Register Service Worker for 100% offline iPhone PWA
+  // Register Service Worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').then((reg) => {
-      console.log('Strength & Hike Service Worker registered successfully', reg.scope);
-    }).catch((err) => {
-      console.warn('Service Worker registration skipped or failed:', err);
-    });
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 });
