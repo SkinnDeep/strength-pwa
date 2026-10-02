@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Strength for Family + Hiking</title>
+  
+  <!-- Apple iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Strength & Hike">
+  <meta name="theme-color" content="#080d14">
+  <meta name="description" content="Sleek 45-minute Strength for Family & Hiking workout tracker and timer.">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="alternate icon" type="image/png" href="./icons/icon-192.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+  <!-- Sticky Top Header & Budget Bar -->
+  <header class="header-bar">
+    <div class="header-top">
+      <div class="brand-wrap">
+        <img src="./icons/icon.svg" alt="App Icon" class="brand-icon">
+        <span class="brand-title">Strength & Hike</span>
+      </div>
+      <div class="header-actions">
+        <!-- Sound Toggle -->
+        <button id="soundToggleBtn" class="icon-btn active" title="Toggle Sound" aria-label="Toggle Sound">
+          <span id="soundIcon">🔔</span>
+        </button>
+        <!-- Wake Lock Indicator -->
+        <button id="wakeLockBtn" class="icon-btn" title="Screen Wake Lock" aria-label="Screen Awake">
+          <span id="wakeLockIcon">☀️</span>
+        </button>
+        <!-- iOS Install / Info -->
+        <button id="infoModalBtn" class="icon-btn" title="Information & Install" aria-label="Help">
+          <span>ℹ️</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 45-min Time Budget Visualizer -->
+    <div class="time-budget-card">
+      <div class="budget-stats-row">
+        <div class="budget-label">
+          <span class="budget-pulse"></span>
+          <span id="sessionTimerStatus">SESSION CLOCK</span>
+        </div>
+        <div class="budget-time" id="sessionTimerDisplay">00:00</div>
+        <div class="budget-target-badge" id="budgetTargetBadge">Target: 45m (Max 49m)</div>
+      </div>
+      <div class="budget-bar-track">
+        <div class="budget-bar-fill" id="budgetBarFill"></div>
+      </div>
+      <div class="budget-segments">
+        <span class="budget-segment" id="segWarmup">Warmup (6m)</span>
+        <span class="budget-segment" id="segStrength">Strength (27m)</span>
+        <span class="budget-segment" id="segCardio">Cardio (7m)</span>
+        <span class="budget-segment" id="segCooldown">Cooldown (5m)</span>
+      </div>
+    </div>
+
+    <!-- Pacing Alert: Skip carry/core if behind -->
+    <div id="pacingAlertBanner" class="time-warning-banner">
+      <span>⚠️ Tight schedule: protocol suggests skipping the final carry/core set.</span>
+      <button id="skipCarryBannerBtn" class="skip-carry-btn">Skip Set 5</button>
+    </div>
+  </header>
+
+  <!-- Main Content Areas -->
+  <main class="content-area">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: WORKOUT -->
+    <!-- ========================================== -->
+    <section id="tab-workout" class="tab-pane active">
+      
+      <!-- Day Selector -->
+      <div class="day-selector-group">
+        <button class="day-tab-btn active" data-day="monday">Monday</button>
+        <button class="day-tab-btn" data-day="wednesday">Wednesday</button>
+        <button class="day-tab-btn" data-day="friday">Friday</button>
+      </div>
+
+      <!-- Session Controls Card -->
+      <div class="session-control-card">
+        <div class="session-header-row">
+          <div>
+            <div class="session-title" id="dayTitleHeader">Monday Strength</div>
+            <div class="session-subtitle" id="daySubtitleHeader">Squat • Smith Press • Row • RDL • Farmer Carry</div>
+          </div>
+          <button id="startSessionBtn" class="timer-pill-btn" style="padding: 6px 12px; font-size: 0.82rem;">
+            ▶ Start Session
+          </button>
+        </div>
+
+        <!-- Intro Phase Toggle (First 2 weeks: 2 working sets) -->
+        <div class="intro-toggle-row">
+          <div class="toggle-info">
+            <span class="toggle-title">Intro Phase (First 2 Weeks)</span>
+            <span class="toggle-hint">Per protocol: 2 working sets wherever 3 are listed</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="introPhaseToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- PHASE 1: WARMUP (6 MINUTES) -->
+      <div class="phase-card open" id="phaseWarmupCard">
+        <div class="phase-header" onclick="togglePhaseCard('phaseWarmupCard')">
+          <div class="phase-header-left">
+            <span class="phase-pill">1</span>
+            <div>
+              <div class="phase-title-text">Warmup — Every Session</div>
+              <div class="phase-subtitle-text">6 Minutes Total • 3 Steps</div>
+            </div>
+          </div>
+          <span class="phase-chevron">▼</span>
+        </div>
+        <div class="phase-content">
+          <!-- Step 1 -->
+          <div class="warmup-step-box">
+            <div class="warmup-step-title">
+              <span>1. Easy treadmill walk or bike (3 min)</span>
+              <button class="timer-pill-btn" onclick="startCustomTimer(180, 'Warmup: Treadmill / Bike')">
+                ⏱️ Start 3:00
+              </button>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted);">
+              Gradually elevate body temperature and lubricate joints at a light, effortless pace.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="warmup-step-box">
+            <div class="warmup-step-title">
+              <span>2. Dynamic Mobility (~1 min)</span>
+              <button class="timer-pill-btn" onclick="startCustomTimer(60, 'Warmup: Mobility')">
+                ⏱️ 1:00 Timer
+              </button>
+            </div>
+            <div class="checklist-group">
+              <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="custom-checkbox"></div>
+                <span>8 bodyweight squats to comfortable depth</span>
+              </div>
+              <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="custom-checkbox"></div>
+                <span>8 unweighted hip hinges</span>
+              </div>
+              <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="custom-checkbox"></div>
+                <span>10 heel-to-toe rocks (rise onto toes, rock back to lift toes/shins)</span>
+              </div>
+              <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="custom-checkbox"></div>
+                <span>10 arm circles each direction</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="warmup-step-box" style="margin-bottom: 0;">
+            <div class="warmup-step-title">
+              <span>3. Light Practice Sets (Remaining 2 min)</span>
+              <button class="timer-pill-btn" onclick="startCustomTimer(120, 'Warmup: Practice Sets')">
+                ⏱️ 2:00 Timer
+              </button>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+              • 1–2 light practice sets of the first exercise.<br>
+              • Before first press, do 1 additional light practice set (included in strength time).<br>
+              <em>* Practice sets do not count as working sets.</em>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE 2: STRENGTH EXERCISES (~27 MINUTES) -->
+      <div id="exerciseListContainer">
+        <!-- Rendered dynamically by app.js based on Monday/Wednesday/Friday -->
+      </div>
+
+      <!-- PHASE 3: CARDIO (7 MINUTES) -->
+      <div class="phase-card" id="phaseCardioCard">
+        <div class="phase-header" onclick="togglePhaseCard('phaseCardioCard')">
+          <div class="phase-header-left">
+            <span class="phase-pill" style="color: var(--accent-emerald);">3</span>
+            <div>
+              <div class="phase-title-text" id="cardioPhaseTitle">Cardio (7 Minutes)</div>
+              <div class="phase-subtitle-text" id="cardioPhaseSubtitle">Incline Treadmill Walk</div>
+            </div>
+          </div>
+          <span class="phase-chevron">▼</span>
+        </div>
+        <div class="phase-content">
+          <div class="warmup-step-box">
+            <div class="warmup-step-title">
+              <span id="cardioMachineDesc">7-min Incline Treadmill Walk</span>
+              <button class="timer-pill-btn" onclick="startCustomTimer(420, 'Cardio: 7 Minutes')">
+                ⏱️ Start 7:00
+              </button>
+            </div>
+            <p id="cardioInstructions" style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px;">
+              Choose speed/incline allowing you to speak in sentences without holding the rails.
+            </p>
+            <div class="check-item" onclick="toggleCheckItem(this)">
+              <div class="custom-checkbox"></div>
+              <span>Conversational pace maintained (hands off rails)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE 4: COOLDOWN & STRETCHES (5 MINUTES) -->
+      <div class="phase-card" id="phaseCooldownCard">
+        <div class="phase-header" onclick="togglePhaseCard('phaseCooldownCard')">
+          <div class="phase-header-left">
+            <span class="phase-pill" style="color: var(--accent-purple);">4</span>
+            <div>
+              <div class="phase-title-text">Cooldown & Stretches</div>
+              <div class="phase-subtitle-text">5 Minutes Total • Walk + 3 Stretches</div>
+            </div>
+          </div>
+          <span class="phase-chevron">▼</span>
+        </div>
+        <div class="phase-content">
+          <!-- Step 1: Slow down -->
+          <div class="warmup-step-box">
+            <div class="warmup-step-title">
+              <span>1. Gradual Slow-Down (2 min)</span>
+              <button class="timer-pill-btn" onclick="startCustomTimer(120, 'Cooldown: Easy Pedal/Walk')">
+                ⏱️ Start 2:00
+              </button>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted);">
+              Gradually slow to an easy walk or pedal to return heart rate toward baseline.
+            </p>
+          </div>
+
+          <!-- Step 2: 3 Stretches -->
+          <div class="warmup-step-box" style="margin-bottom: 0;">
+            <div class="warmup-step-title">
+              <span>2. Stretches (3 min total)</span>
+              <button class="timer-pill-btn" onclick="startGuidedStretches()">
+                🧘 Guided Routine
+              </button>
+            </div>
+            <p style="font-size: 0.76rem; color: var(--text-dim); margin-bottom: 8px;">
+              Gentle tension only. Breathe normally; do not bounce.
+            </p>
+
+            <div class="checklist-group">
+              <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="custom-checkbox"></div>
+                <div>
+                  <strong>Calf Stretch:</strong> 30s per side (hands against wall, back heel down).
+                </div>
+              </div>
+              <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="custom-checkbox"></div>
+                <div>
+                  <strong>Hip Flexor Stretch:</strong> 30s per side (staggered stance, tuck belt buckle up & shift forward).
+                </div>
+              </div>
+              <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="custom-checkbox"></div>
+                <div>
+                  <strong>Chest Stretch:</strong> 30–45s (forearms against doorway or corner, step gently forward).
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Finish Workout Action -->
+      <button id="finishWorkoutBtn" class="primary-action-btn">
+        ✅ Complete Session & Log Stats
+      </button>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: TIMER -->
+    <!-- ========================================== -->
+    <section id="tab-timer" class="tab-pane">
+      <div class="session-control-card" style="text-align: center;">
+        <div class="session-title" style="justify-content: center;">Rest & Interval Timer</div>
+        <div class="session-subtitle" id="timerActivityLabel">Select preset or customize below</div>
+
+        <!-- Big Hero Circular Clock -->
+        <div class="timer-hero-circle">
+          <div class="timer-hero-time" id="heroTimerDigits">01:30</div>
+          <div class="timer-hero-sub" id="heroTimerSub">Rest Period</div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="timer-preset-row">
+          <button class="preset-pill" onclick="setAndStartTimer(60, 'Rest: 60s (Carries / Core / Calves)')">60s</button>
+          <button class="preset-pill" onclick="setAndStartTimer(90, 'Rest: 90s (Rows / Deadlifts)')">90s</button>
+          <button class="preset-pill" onclick="setAndStartTimer(120, 'Rest: 2m (Squats / Presses)')">120s</button>
+          <button class="preset-pill" onclick="setAndStartTimer(30, 'Farmer / Suitcase Carry')">30s Carry</button>
+        </div>
+
+        <!-- Timer Controls -->
+        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 10px;">
+          <button class="rest-chip-btn" onclick="adjustActiveTimer(-15)">-15s</button>
+          <button id="heroPlayPauseBtn" class="primary-action-btn" style="width: auto; padding: 10px 24px; margin-top: 0;" onclick="toggleHeroTimer()">
+            Pause
+          </button>
+          <button class="rest-chip-btn" onclick="adjustActiveTimer(15)">+15s</button>
+          <button class="rest-chip-btn" onclick="resetActiveTimer()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Rest Protocol Guide Card -->
+      <div class="rule-section">
+        <h3>⏱️ Protocol Rest Standards</h3>
+        <ul class="rule-list">
+          <li><strong>Squats & Presses:</strong> Rest 2 minutes between sets.</li>
+          <li><strong>Deadlifts (RDL):</strong> Rest 90–120 seconds between sets.</li>
+          <li><strong>Rows & Pulldowns:</strong> Rest 60–90 seconds between sets.</li>
+          <li><strong>Carries, Calf Raises & Core:</strong> Rest 60 seconds.</li>
+          <li><strong>One-sided exercises:</strong> Do both sides, then rest. Take 15–30s to switch sides if needed.</li>
+          <li><strong>Equipment changes:</strong> Count as rest between exercises. Start your first set as soon as you set up at the new station.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: HIKE & OUTSIDE WALKING -->
+    <!-- ========================================== -->
+    <section id="tab-hiking" class="tab-pane">
+      
+      <!-- 150-Min Weekly Goal Progress Card -->
+      <div class="hiking-hero-card">
+        <div class="hiking-goal-header">
+          <div class="hiking-goal-title">
+            <span>⛰️ Weekly Moderate Cardio</span>
+          </div>
+          <div>
+            <span class="hiking-minutes-big" id="weeklyCardioMinutes">21</span>
+            <span class="hiking-target-label">/ 150 min</span>
+          </div>
+        </div>
+        <div class="hiking-progress-track">
+          <div class="hiking-progress-bar" id="weeklyCardioProgressBar" style="width: 14%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-muted);">
+          <span id="gymCardioThisWeek">Gym: 21m</span>
+          <span id="outdoorCardioThisWeek">Outdoor: 0m</span>
+          <span id="cardioRemainingLabel">129m left</span>
+        </div>
+      </div>
+
+      <!-- Quick Outdoor Log Form -->
+      <div class="session-control-card">
+        <div class="session-title" style="margin-bottom: 10px;">🌲 Log Walk or Hike</div>
+        
+        <form id="outdoorLogForm" onsubmit="handleOutdoorLogSubmit(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div>
+              <label style="font-size: 0.74rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Activity</label>
+              <select id="hikeTypeInput" style="width: 100%; background: var(--bg-input); color: #fff; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px;">
+                <option value="Brisk Walk (Tue/Thu)">Brisk Walk (Tue/Thu)</option>
+                <option value="Weekend Hike">Weekend Hike</option>
+                <option value="Trail Walk">Trail Walk</option>
+                <option value="Ruck / Pack Walk">Ruck / Weighted Walk</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.74rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Duration (min)</label>
+              <input type="number" id="hikeDurationInput" placeholder="30" required style="width: 100%; background: var(--bg-input); color: #fff; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 0.74rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Elevation Gain (ft)</label>
+              <input type="number" id="hikeElevationInput" placeholder="e.g. 450" style="width: 100%; background: var(--bg-input); color: #fff; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px;">
+            </div>
+            <div>
+              <label style="font-size: 0.74rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Pack Weight (lb)</label>
+              <input type="number" id="hikePackWeightInput" placeholder="e.g. 10 (or 0)" style="width: 100%; background: var(--bg-input); color: #fff; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px;">
+            </div>
+          </div>
+
+          <button type="submit" class="timer-pill-btn" style="width: 100%; justify-content: center; padding: 10px; font-size: 0.85rem;">
+            + Save Outdoor Activity
+          </button>
+        </form>
+      </div>
+
+      <!-- Hiking Guidance Box -->
+      <div class="rule-section">
+        <h3>🏔️ Outdoor Protocol Rules</h3>
+        <ul class="rule-list">
+          <li><strong>Routine:</strong> Gradually add brisk walks on Tuesday & Thursday, plus a weekend walk or mountain hike.</li>
+          <li><strong>Longevity Target:</strong> Build toward 150 total moderate-intensity minutes weekly, including your gym cardio sessions.</li>
+          <li><strong>Hiking Progression:</strong> Increase hiking time and elevation gradually <em>before</em> adding backpack weight.</li>
+        </ul>
+      </div>
+
+      <!-- Recent Outdoor Logs -->
+      <div class="session-control-card">
+        <div class="session-title" style="margin-bottom: 10px; font-size: 0.95rem;">Recent Walks & Hikes</div>
+        <div id="outdoorLogsList">
+          <p style="font-size: 0.8rem; color: var(--text-dim); text-align: center; padding: 10px;">No outdoor walks logged yet this week.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: PROGRESS & LOGS -->
+    <!-- ========================================== -->
+    <section id="tab-progress" class="tab-pane">
+      
+      <!-- Progression Rules Card -->
+      <div class="session-control-card">
+        <div class="session-title" style="font-size: 1rem; color: var(--accent-amber);">
+          ⭐ Double Progression Tracker
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; line-height: 1.45;">
+          • When all sets reach the top of the rep range with good form for <strong>2 consecutive sessions</strong>, increase by the smallest available weight increment.<br>
+          • After increasing weight, return toward the lower end of the rep range.<br>
+          • Carries: build from 30s to 45s, then increase weight and return to 30s.
+        </p>
+      </div>
+
+      <!-- Current Weight Streaks by Exercise -->
+      <div class="session-control-card">
+        <div class="session-title" style="font-size: 0.95rem; margin-bottom: 12px;">Current Working Weights</div>
+        <div id="progressionStatsGrid" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Past Workout History List -->
+      <div class="session-control-card">
+        <div class="session-header-row">
+          <div class="session-title" style="font-size: 0.95rem;">Completed Sessions</div>
+          <button class="timer-pill-btn" onclick="exportDataJSON()" style="font-size: 0.72rem;">
+            Export JSON
+          </button>
+        </div>
+        <div id="workoutHistoryList">
+          <p style="font-size: 0.8rem; color: var(--text-dim); text-align: center; padding: 14px;">No completed workouts yet.</p>
+        </div>
+      </div>
+
+      <!-- Data Backup & Reset -->
+      <div style="display: flex; gap: 10px; margin-top: 14px;">
+        <button class="rest-chip-btn" style="flex: 1; text-align: center;" onclick="triggerImportFileInput()">
+          Import Data
+        </button>
+        <button class="rest-chip-btn" style="color: var(--accent-rose); border-color: rgba(244,63,94,0.3);" onclick="confirmResetAllData()">
+          Reset Data
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: RULES & HOSTING GUIDE -->
+    <!-- ========================================== -->
+    <section id="tab-rules" class="tab-pane">
+      
+      <!-- Free Hosting Modal Opener -->
+      <div class="session-control-card" style="background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(2,132,199,0.05)); border-color: var(--border-active);">
+        <div class="session-title" style="color: var(--accent-sky);">
+          🚀 Free Hosting for iPhone PWA
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 6px 0 10px;">
+          Deploy this exact PWA for free in 2 minutes on <strong>GitHub Pages</strong> or <strong>Cloudflare Pages</strong>. Zero monthly cost, HTTPS, offline-ready!
+        </p>
+        <button class="timer-pill-btn" onclick="openHostingGuideModal()" style="width: 100%; justify-content: center; padding: 8px;">
+          View 2-Minute Deployment Steps →
+        </button>
+      </div>
+
+      <!-- Protocol Summary -->
+      <div class="rule-section">
+        <h3>📋 General Rules</h3>
+        <ul class="rule-list">
+          <li><strong>DB:</strong> DB = dumbbell. DB weights are per hand unless labeled “total”.</li>
+          <li><strong>Effort (RIR):</strong> Finish each lifting set with about 2 good reps left (RIR 2).</li>
+          <li><strong>One-sided exercises:</strong> Do both sides, then rest. Take 15–30s to switch sides if needed.</li>
+          <li><strong>Equipment changes:</strong> Serve as the rest between different exercises—start your first set as soon as you set up at the new station.</li>
+          <li><strong>Time budget priority:</strong> Never rush reps to beat the clock. If behind schedule, skip the final carry/core set.</li>
+          <li><strong>Pain stop rule:</strong> Sharp or joint pain: stop immediately and substitute or change the movement.</li>
+        </ul>
+      </div>
+
+      <div class="rule-section">
+        <h3>⏱️ Time Budget Allocation</h3>
+        <ul class="rule-list">
+          <li><strong>Warmup:</strong> 6 minutes (3m walk/bike + 1m dynamic mobility + 2m practice sets).</li>
+          <li><strong>Strength:</strong> ~27 minutes (including rest periods and station transitions).</li>
+          <li><strong>Cardio:</strong> 7 minutes (conversational effort).</li>
+          <li><strong>Cooldown:</strong> 5 minutes (2m gradual slow-down + 3m calf, hip, and chest stretches).</li>
+          <li><strong>Session Total:</strong> Target 45 minutes; maximum 49 minutes.</li>
+        </ul>
+      </div>
+
+      <div class="rule-section">
+        <h3>📈 Progression Strategy</h3>
+        <ul class="rule-list">
+          <li><strong>First 2 weeks:</strong> Only 2 working sets wherever 3 are listed (toggle on top).</li>
+          <li><strong>2-Session Top Rep Rule:</strong> When all sets reach the top of the rep range with good form for 2 consecutive sessions, increase by the smallest available weight increment.</li>
+          <li><strong>Reset rep range:</strong> After increasing weight, return toward the lower end of the rep range.</li>
+          <li><strong>Carries:</strong> Build from 30 to 45 seconds, then increase weight and return to 30 seconds.</li>
+          <li><strong>Deload:</strong> If recovery or performance worsens, reduce a set or lower weight temporarily.</li>
+        </ul>
+      </div>
+
+      <!-- App Version & Offline Status -->
+      <div style="text-align: center; font-size: 0.74rem; color: var(--text-dim); padding: 10px;">
+        Strength & Hike PWA • Offline Service Worker Active • v1.0.0
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- FLOATING REST TIMER OVERLAY -->
+  <!-- ========================================== -->
+  <div id="floatingRestBanner" class="rest-banner">
+    <div class="rest-banner-inner">
+      <div class="rest-info">
+        <div class="rest-countdown" id="restTimerBannerDigits">01:30</div>
+        <div class="rest-meta">
+          <span class="rest-title" id="restBannerTitle">Resting</span>
+          <span class="rest-subtitle" id="restBannerSubtitle">Catch breath & log notes</span>
+        </div>
+      </div>
+      <div class="rest-controls">
+        <button class="rest-chip-btn" onclick="adjustActiveTimer(-15)">-15s</button>
+        <button class="rest-chip-btn" onclick="adjustActiveTimer(15)">+15s</button>
+        <button class="rest-close-btn" onclick="dismissRestTimer()" title="Skip / Close">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- BOTTOM TAB NAVIGATION (iOS STYLE) -->
+  <!-- ========================================== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('workout')">
+      <span class="nav-icon">🏋️‍♂️</span>
+      <span>Workout</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('timer')">
+      <span class="nav-icon">⏱️</span>
+      <span>Timer</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('hiking')">
+      <span class="nav-icon">🥾</span>
+      <span>Hike & Walk</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('progress')">
+      <span class="nav-icon">📈</span>
+      <span>Progress</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('rules')">
+      <span class="nav-icon">⚙️</span>
+      <span>Rules & Info</span>
+    </button>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- MODAL: FREE HOSTING GUIDE -->
+  <!-- ========================================== -->
+  <div id="hostingModal" class="modal-overlay" onclick="closeModalOnOutsideClick(event, 'hostingModal')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">🚀 Free Hosting for iPhone</div>
+        <button class="icon-btn" onclick="closeModal('hostingModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 12px;">
+          For iPhone PWAs, <strong>GitHub Pages</strong> or <strong>Cloudflare Pages</strong> are infinitely better than 50webs because they offer fast global HTTPS, zero ads, zero fees, and seamless PWA updates.
+        </p>
+
+        <h4 style="color: #fff; margin: 12px 0 6px;">Option 1: GitHub Pages (Recommended — 2 mins)</h4>
+        <ol style="padding-left: 18px; margin-bottom: 14px; font-size: 0.82rem; display: flex; flex-direction: column; gap: 6px;">
+          <li>Log in to <a href="https://github.com" target="_blank" style="color: var(--accent-sky);">github.com</a> and create a new public repository (e.g. <code>strength-pwa</code>).</li>
+          <li>Push or upload the files from this directory directly to the <code>main</code> branch.</li>
+          <li>In your repo, click <strong>Settings</strong> → <strong>Pages</strong>.</li>
+          <li>Under <em>Branch</em>, select <code>main</code> / <code>root</code> and click <strong>Save</strong>.</li>
+          <li>In 60 seconds, GitHub gives you a free live URL: <code>https://yourusername.github.io/strength-pwa/</code>.</li>
+        </ol>
+
+        <h4 style="color: #fff; margin: 12px 0 6px;">How to Install on iPhone</h4>
+        <ol style="padding-left: 18px; margin-bottom: 14px; font-size: 0.82rem; display: flex; flex-direction: column; gap: 6px;">
+          <li>Open your live URL in <strong>Safari</strong> on your iPhone.</li>
+          <li>Tap the <strong>Share</strong> button (the square with an arrow pointing up at the bottom).</li>
+          <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+          <li>The app will launch full-screen like a native iOS app with offline gym support!</li>
+        </ol>
+      </div>
+      <button class="primary-action-btn" onclick="closeModal('hostingModal')" style="margin-top: 14px;">Got It</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: INFO & INSTALLATION -->
+  <!-- ========================================== -->
+  <div id="infoModal" class="modal-overlay" onclick="closeModalOnOutsideClick(event, 'infoModal')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">📱 Strength for Family & Hiking</div>
+        <button class="icon-btn" onclick="closeModal('infoModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 10px;">
+          This PWA is custom engineered for your 45-minute (max 49m) gym routine + outside hiking progression.
+        </p>
+        <ul style="padding-left: 18px; margin-bottom: 12px; font-size: 0.82rem; display: flex; flex-direction: column; gap: 6px;">
+          <li><strong>Sound Synthesis:</strong> Pleasant gym chimes and countdown beeps using Web Audio API (no internet needed).</li>
+          <li><strong>Screen Awake:</strong> Screen WakeLock keeps display active while resting between sets.</li>
+          <li><strong>Double Progression:</strong> Suggests weight jumps after 2 consecutive sessions at max reps.</li>
+          <li><strong>150m Hiking Goal:</strong> Tracks both gym cardio & outdoor weekend hikes.</li>
+        </ul>
+        <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); font-size: 0.78rem;">
+          💡 <strong>iPhone Tip:</strong> In Safari, tap Share ⎋ → "Add to Home Screen" to install as a full-screen app.
+        </div>
+      </div>
+      <button class="primary-action-btn" onclick="closeModal('infoModal')" style="margin-top: 14px;">Close</button>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

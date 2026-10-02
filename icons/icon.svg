@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#111c2e" />
+      <stop offset="100%" stop-color="#070b12" />
+    </linearGradient>
+    <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="0.5" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Base Background with iOS curved square -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#334155" stroke-width="4" opacity="0.5" />
+  
+  <!-- Rising Sun Ring -->
+  <circle cx="256" cy="130" r="42" fill="url(#goldGrad)" opacity="0.9" />
+  <circle cx="256" cy="130" r="54" fill="none" stroke="#fbbf24" stroke-width="4" stroke-dasharray="8 6" opacity="0.6" />
+
+  <!-- Back Mountain Peaks -->
+  <polygon points="130,370 256,190 382,370" fill="#1e293b" opacity="0.85" />
+  <polygon points="256,190 286,232 268,232 256,214 244,232 226,232" fill="#94a3b8" opacity="0.5" />
+  
+  <!-- Blue Right Mountain -->
+  <polygon points="210,380 340,210 470,380" fill="url(#accentGrad)" opacity="0.9" />
+  <polygon points="340,210 370,250 355,250 340,232 325,250 310,250" fill="#f0f9ff" opacity="0.9" />
+
+  <!-- Emerald Left Mountain (Hiking Path vibe) -->
+  <polygon points="42,390 180,200 318,390" fill="url(#mountainGrad)" />
+  <polygon points="180,200 215,245 195,245 180,228 165,245 145,245" fill="#ecfdf5" opacity="0.95" />
+
+  <!-- Dumbbell / Strength Barbell on bottom -->
+  <g transform="translate(0, 10)">
+    <!-- Dumbbell Bar -->
+    <rect x="176" y="385" width="160" height="18" rx="9" fill="#f8fafc" />
+    
+    <!-- Left Collar -->
+    <rect x="190" y="372" width="10" height="44" rx="4" fill="#94a3b8" />
+    <!-- Left Plate Outer -->
+    <rect x="156" y="354" width="24" height="80" rx="8" fill="url(#goldGrad)" />
+    <!-- Left Plate Inner -->
+    <rect x="126" y="362" width="22" height="64" rx="6" fill="#38bdf8" />
+    
+    <!-- Right Collar -->
+    <rect x="312" y="372" width="10" height="44" rx="4" fill="#94a3b8" />
+    <!-- Right Plate Outer -->
+    <rect x="332" y="354" width="24" height="80" rx="8" fill="url(#goldGrad)" />
+    <!-- Right Plate Inner -->
+    <rect x="364" y="362" width="22" height="64" rx="6" fill="#38bdf8" />
+  </g>
+</svg>
