@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Strength & Hike">
-  <meta name="theme-color" content="#080d14">
-  <meta name="description" content="Sleek step-by-step workout tracker for strength, cardio, and hiking.">
+  <meta name="theme-color" content="#0a0e17">
+  <meta name="description" content="Commercial fitness-grade workout player for iPhone.">
 
   <!-- Icons -->
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
@@ -23,7 +23,7 @@
 <body>
 
   <!-- Sticky Top Header -->
-  <header class="header-bar">
+  <header class="header-bar" id="appHeader">
     <div class="header-top">
       <div class="brand-wrap">
         <img src="./icons/icon.svg" alt="App Icon" class="brand-icon">
@@ -39,7 +39,7 @@
           <span id="wakeLockIcon">☀️</span>
         </button>
         <!-- Info & Install Guide -->
-        <button id="infoModalBtn" class="icon-btn" title="Protocol & Hosting Guide" aria-label="Info">
+        <button id="infoModalBtn" class="icon-btn" title="Hosting & Install Guide" aria-label="Info">
           <span>ℹ️</span>
         </button>
       </div>
@@ -50,7 +50,7 @@
   <main class="content-area">
 
     <!-- ==================================================================== -->
-    <!-- TAB 1: WORKOUT (DASHBOARD & LINEAR PLAYER)                           -->
+    <!-- TAB 1: WORKOUT (DASHBOARD & FITNESS APP PLAYER)                      -->
     <!-- ==================================================================== -->
     <section id="tab-workout" class="tab-pane active">
 
@@ -68,7 +68,7 @@
 
         <!-- Today's Workout Summary Card -->
         <div class="home-workout-card">
-          <div class="home-workout-header">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
             <div>
               <div class="home-title" id="homeDayTitle">Monday Strength</div>
               <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
@@ -110,139 +110,123 @@
           </button>
         </div>
 
-        <!-- Outdoor Cardio Reminder Banner -->
-        <div class="rule-section" style="padding: 12px 14px; background: rgba(16, 185, 129, 0.08); border-color: var(--border-emerald);">
-          <div style="font-size: 0.82rem; color: #a7f3d0; display: flex; align-items: center; justify-content: space-between;">
-            <span>⛰️ Weekly Moderate Goal: 150 min</span>
-            <strong id="homeCardioMiniStat">21 / 150m</strong>
+        <!-- Weekly Outdoor Goal Tracker Bar -->
+        <div class="hiking-hero-card" style="padding: 14px 16px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <span style="font-size: 0.82rem; font-weight: 700; color: #ffab91;">⛰️ Weekly 150m Cardio Goal</span>
+            <span style="font-size: 0.95rem; font-weight: 900; color: #fff;" id="homeCardioMiniStat">21 / 150 min</span>
+          </div>
+          <div class="hiking-progress-track">
+            <div class="hiking-progress-bar" id="homeCardioMiniBar" style="width: 14%;"></div>
           </div>
         </div>
 
       </div>
 
       <!-- ============================================== -->
-      <!-- VIEW B: LINEAR STEP-BY-STEP PLAYER             -->
+      <!-- VIEW B: COMMERCIAL FITNESS APP PLAYER VIEW     -->
+      <!-- Directly matching user reference image         -->
       <!-- ============================================== -->
       <div id="linearWorkoutView">
-        
-        <!-- Top HUD: Progress & Session Clock -->
-        <div class="workout-hud-card">
-          <div class="hud-top-row">
-            <div class="hud-step-badge" id="hudStepText">Step 1 of 18</div>
-            <div class="hud-timer-badge">
-              <span id="sessionTimerDisplay">00:00</span>
-              <span style="font-size: 0.72rem; color: var(--text-dim); font-weight: normal;">/ 45m</span>
-            </div>
-            <button class="icon-btn" style="width: 30px; height: 30px; font-size: 0.8rem;" onclick="openOverviewModal()" title="Workout Overview / Skip">
-              📋
-            </button>
-          </div>
-          <div class="hud-progress-track">
-            <div class="hud-progress-fill" id="hudProgressFill"></div>
-          </div>
-        </div>
-
-        <!-- MAIN STEP CARD (ONE EXERCISE AT A TIME) -->
-        <div class="linear-step-card" id="mainStepCard">
+        <div class="player-card-shell">
           
-          <!-- STATE 1: ACTIVE SET SCREEN -->
-          <div id="activeSetMode">
-            
-            <!-- Simple Clean Illustration -->
-            <div class="illustration-box" id="illustrationContainer">
-              <!-- SVG inserted dynamically -->
-            </div>
-
-            <span class="step-phase-pill" id="stepPhaseLabel">Strength Phase</span>
-            <div class="step-exercise-name" id="stepExerciseTitle">Goblet Squat</div>
-            
-            <div class="step-target-row">
-              <span class="step-set-counter" id="stepSetCounter">Set 1 of 3</span>
-              <span class="step-target-reps" id="stepTargetReps">Target: 6–10 Reps • 40–50 lb</span>
-            </div>
-
-            <!-- 1-2 Bullets of Good Form -->
-            <div class="form-cue-box">
-              <div class="form-cue-title">Good Form Keys</div>
-              <ul class="form-cue-list" id="formCueList">
-                <li>Hold dumbbell vertically against chest; elbows tucked.</li>
-                <li>Sit back & down between knees, chest tall. Finish with 2 good reps left.</li>
-              </ul>
-            </div>
-
-            <!-- Standard Reps/Weight Logger (For Lifting Sets) -->
-            <div id="liftingSetLogger" class="linear-log-row">
-              <div class="linear-input-box">
-                <span class="input-caption" id="weightLabelCaption">Weight (lb)</span>
-                <div class="stepper-control">
-                  <button class="stepper-arrow-btn" onclick="stepCurrentWeight(-5)">−</button>
-                  <input type="number" id="currentWeightInput" class="stepper-val-input" value="45" onchange="handleCurrentWeightChange(this.value)">
-                  <button class="stepper-arrow-btn" onclick="stepCurrentWeight(5)">+</button>
-                </div>
-              </div>
-
-              <div class="linear-input-box">
-                <span class="input-caption" id="repsLabelCaption">Reps</span>
-                <div class="stepper-control">
-                  <button class="stepper-arrow-btn" onclick="stepCurrentReps(-1)">−</button>
-                  <input type="number" id="currentRepsInput" class="stepper-val-input" value="8" onchange="handleCurrentRepsChange(this.value)">
-                  <button class="stepper-arrow-btn" onclick="stepCurrentReps(1)">+</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Complete Set Action Button -->
-            <button id="completeStepBtn" class="complete-set-btn" onclick="handleCompleteCurrentStep()">
-              <span>✓ Complete Set</span>
+          <!-- 1. Player Top Bar: Back Arrow, Segmented Dashes, Equipment Badge -->
+          <div class="player-top-bar">
+            <button class="player-back-btn" onclick="confirmExitWorkout()" title="Back to Workout Overview">
+              ←
             </button>
+            <div class="segmented-progress-bar" id="segmentedProgressBar">
+              <!-- Rendered dynamically as segment-dashes -->
+            </div>
+            <div class="equipment-badge" id="equipmentBadge" title="Equipment required">
+              <span id="equipmentIcon">🏋️</span>
+            </div>
+          </div>
 
-            <!-- Timed Movement Countdown (For Carries, Cardio, Stretches) -->
-            <div id="timedSetControls" class="timed-step-wrap" style="display: none;">
-              <div class="timed-countdown-display" id="timedCountdownDisplay">00:30</div>
-              <button id="timedActionBtn" class="big-start-btn" style="padding: 14px 20px; font-size: 1.05rem;" onclick="handleTimedActionClick()">
-                ▶ Start Timer
+          <!-- 2. Visual Stage (Athletic Graphic with Orange Joint Nodes) -->
+          <div class="player-visual-stage" id="playerVisualStage">
+            <!-- SVG inserted dynamically -->
+          </div>
+
+          <!-- 3. Controls Sheet Area -->
+          <div class="player-controls-sheet">
+            <div class="player-step-subtitle" id="playerStepSubtitle">
+              EXERCISE 1 OF 5 • SET 1 OF 3
+            </div>
+            <h1 class="player-exercise-title" id="playerExerciseTitle">
+              GOBLET SQUAT
+            </h1>
+
+            <!-- 4. Giant Hero Digits (Electric Orange like Screenshot) -->
+            <div class="player-giant-digits" id="playerGiantDigits">
+              00:30
+            </div>
+            <div class="player-digits-caption" id="playerDigitsCaption">
+              TARGET: 6–10 REPS • 40–50 LB
+            </div>
+
+            <!-- 5. Smart Tips Pill (Matching screenshot) -->
+            <div class="smart-tips-pill" onclick="toggleSmartTips()">
+              <span>💡 Smart Tips:</span>
+              <span id="smartTipsSnippet">Hold DB vertically at chest • Sit back between knees</span>
+              <span style="font-size: 0.7rem;">▾</span>
+            </div>
+            <div class="smart-tips-dropdown" id="smartTipsDropdown">
+              <ul id="smartTipsList"></ul>
+            </div>
+
+            <!-- 6. Quick Weight & Rep Stepper Chips -->
+            <div class="quick-adjust-bar" id="quickAdjustBar">
+              <div class="adjust-chip">
+                <span class="adjust-label" id="adjustWeightLabel">WEIGHT</span>
+                <div class="chip-stepper">
+                  <button onclick="stepPlayerWeight(-5)">−</button>
+                  <span id="playerWeightVal">45 lb</span>
+                  <button onclick="stepPlayerWeight(5)">+</button>
+                </div>
+              </div>
+              <div class="adjust-chip">
+                <span class="adjust-label">REPS</span>
+                <div class="chip-stepper">
+                  <button onclick="stepPlayerReps(-1)">−</button>
+                  <span id="playerRepsVal">8 reps</span>
+                  <button onclick="stepPlayerReps(1)">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7. Media Transport Bar (|◀   [ ✓ DONE / || ]   ▶|) -->
+            <div class="player-transport-bar">
+              <!-- Previous Step Button -->
+              <button class="transport-btn" onclick="playerStepPrev()" title="Previous Step">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                </svg>
+              </button>
+
+              <!-- Central Big Pill (Matches user screenshot) -->
+              <button class="transport-pill-main" id="playerMainActionBtn" onclick="playerMainActionClick()">
+                <span id="playerMainActionIcon">✓</span>
+                <span id="playerMainActionText">DONE</span>
+              </button>
+
+              <!-- Next Step Button -->
+              <button class="transport-btn" onclick="playerStepNext()" title="Next Step">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                </svg>
               </button>
             </div>
 
-          </div>
-
-          <!-- STATE 2: REST TIMER SCREEN (In-Place Transition) -->
-          <div id="restTimerMode" class="rest-mode-card">
-            <span class="step-phase-pill" style="color: var(--accent-sky);">Rest Period</span>
-            <div class="step-exercise-name" style="font-size: 1.25rem;">Catch Your Breath</div>
-            
-            <div class="rest-circle-wrap">
-              <div class="rest-countdown-big" id="restTimerBigDigits">02:00</div>
-              <div class="rest-sub-label">Seconds Rest</div>
+            <!-- Footer: Session Clock & Pacing Skip -->
+            <div class="player-footer-clock">
+              <span>Session: <strong id="playerSessionClock">00:00</strong> / 45m</span>
+              <button class="skip-set-link" onclick="quickSkipFinalSet()">Skip Set 5 (Pacing)</button>
             </div>
 
-            <div class="rest-next-preview" id="restNextPreview">
-              Up Next: <strong>Set 2 of 3 — Goblet Squat (45 lb)</strong>
-            </div>
-
-            <div class="rest-actions-row">
-              <button class="nav-step-btn" onclick="adjustRestTimer(-15)">-15s</button>
-              <button class="nav-step-btn" style="background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #fff;" onclick="toggleRestTimerPlayPause()" id="restPlayPauseBtn">Pause</button>
-              <button class="nav-step-btn" onclick="adjustRestTimer(15)">+15s</button>
-              <button class="nav-step-btn" style="background: rgba(16, 185, 129, 0.2); border-color: var(--border-emerald); color: #a7f3d0;" onclick="skipRestTimer()">Skip ▶</button>
-            </div>
           </div>
 
         </div>
-
-        <!-- Linear Bottom Navigation Controls -->
-        <div class="linear-footer-nav">
-          <button class="nav-step-btn" onclick="stepPrevious()">
-            ◀ Prev Step
-          </button>
-          <button class="nav-step-btn" style="color: #fda4af;" onclick="confirmExitWorkout()">
-            Exit / Stop
-          </button>
-          <button class="nav-step-btn" onclick="stepNext()">
-            Next Step ▶
-          </button>
-        </div>
-
       </div>
 
     </section>
@@ -255,7 +239,7 @@
       <!-- 150-Min Weekly Goal Progress Card -->
       <div class="hiking-hero-card">
         <div class="hiking-goal-header">
-          <div style="font-size: 0.95rem; font-weight: 700; color: #a7f3d0;">
+          <div style="font-size: 0.95rem; font-weight: 700; color: #ffab91;">
             ⛰️ Weekly Moderate Cardio
           </div>
           <div>
@@ -362,30 +346,6 @@
     </section>
 
   </main>
-
-  <!-- ==================================================================== -->
-  <!-- MODAL: WORKOUT STEP OVERVIEW / SKIP                                  -->
-  <!-- ==================================================================== -->
-  <div id="overviewModal" class="modal-overlay" onclick="closeModalOnOutsideClick(event, 'overviewModal')">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-title">Workout Overview</div>
-        <button class="icon-btn" onclick="closeModal('overviewModal')">✕</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 8px;">
-          Tap any step to jump directly to it, or skip Set 5 if you are behind schedule.
-        </p>
-        <div class="overview-modal-list" id="overviewStepList">
-          <!-- Populated dynamically -->
-        </div>
-        <button class="nav-step-btn" style="width: 100%; color: var(--accent-rose); border-color: rgba(244,63,94,0.3); margin-top: 10px;" onclick="skipFinalCarrySet()">
-          ⏩ Skip Final Carry/Core Set (Schedule Saver)
-        </button>
-      </div>
-      <button class="big-start-btn" style="margin-top: 14px; padding: 12px;" onclick="closeModal('overviewModal')">Close</button>
-    </div>
-  </div>
 
   <!-- ==================================================================== -->
   <!-- MODAL: FREE HOSTING & INSTALLATION                                   -->
