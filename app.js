@@ -1,10 +1,12 @@
 /**
  * Strength for Family + Hiking PWA
- * Commercial Fitness App Player Engine (Directly matching user reference UI)
+ * Robust Commercial Fitness App Engine
+ * Features: Wall-clock timestamp timing, Web Notifications, Screen WakeLock keepalive,
+ * Persistent weight/reps defaults, Next exercise rest preview with weights, Theme toggle.
  */
 
 // =============================================================================
-// 1. WORKOUT DEFINITIONS & EXERCISES
+// 1. WORKOUT DEFINITIONS
 // =============================================================================
 
 const WORKOUT_PROGRAMS = {
@@ -349,40 +351,84 @@ const WORKOUT_PROGRAMS = {
 const STORAGE_KEYS = {
   HISTORY: 'sh_workout_history_v3',
   OUTDOOR: 'sh_outdoor_logs_v3',
-  PROGRESSION: 'sh_progression_tracker_v3'
+  PROGRESSION: 'sh_progression_tracker_v3',
+  DEFAULTS: 'sh_exercise_defaults_v3',
+  NOTIFS: 'sh_notifs_enabled_v3',
+  THEME: 'sh_theme_mode_v3',
+  WAKE: 'sh_wake_enabled_v3',
+  SOUND: 'sh_sound_enabled_v3'
 };
 
 let appState = {
   currentDay: 'monday',
   introPhase: false,
   soundEnabled: true,
-  screenAwake: false,
+  notificationsEnabled: false,
+  screenAwake: true,
+  theme: 'dark',
   sessionActive: false,
   sessionStartTime: null,
   sessionElapsedSeconds: 0,
   
-  // Linear Player Flow
+  // Linear Flow
   linearSteps: [],
   currentStepIndex: 0,
   isResting: false,
   loggedStepData: {}
 };
 
+// Accurate Wall-Clock Timers
 let restTimer = {
-  intervalId: null,
-  remainingSeconds: 0,
+  endTime: null,
   totalSeconds: 0,
+  remainingSeconds: 0,
+  intervalId: null,
   isRunning: false
 };
 
 let timedExerciseTimer = {
-  intervalId: null,
+  endTime: null,
+  totalSeconds: 0,
   remainingSeconds: 0,
+  intervalId: null,
   isRunning: false
 };
 
 // =============================================================================
-// 3. AUDIO SYNTHESIZER
+// 3. PERSISTENT EXERCISE DEFAULTS (Updates across sessions)
+// =============================================================================
+
+function getStoredExerciseDefaults() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.DEFAULTS) || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function persistExerciseDefault(exerciseId, weight, reps) {
+  if (!exerciseId) return;
+  const defaults = getStoredExerciseDefaults();
+  if (!defaults[exerciseId]) defaults[exerciseId] = {};
+  if (weight !== undefined && weight !== null) defaults[exerciseId].weight = parseFloat(weight);
+  if (reps !== undefined && reps !== null) defaults[exerciseId].reps = parseInt(reps, 10);
+  localStorage.setItem(STORAGE_KEYS.DEFAULTS, JSON.stringify(defaults));
+}
+
+function getPastExerciseStats(exId) {
+  const defaults = getStoredExerciseDefaults();
+  if (defaults[exId]) {
+    return defaults[exId];
+  }
+  const prog = getStoredProgression();
+  if (prog[exId] && prog[exId].currentWeight !== undefined) {
+    return { weight: prog[exId].currentWeight, reps: 8 };
+  }
+  return null;
+}
+
+// =============================================================================
+// 4. AUDIO SYNTHESIZER
 // =============================================================================
 
 let audioCtx = null;
@@ -438,42 +484,193 @@ function playFanfare() {
   if (navigator.vibrate) navigator.vibrate([150, 80, 150, 80, 300]);
 }
 
+function toggleSound() {
+  appState.soundEnabled = !appState.soundEnabled;
+  localStorage.setItem(STORAGE_KEYS.SOUND, appState.soundEnabled ? 'true' : 'false');
+  updateSoundButtonUI();
+  if (appState.soundEnabled) playTone(880, 'sine', 0.1, 0.2);
+}
+
+function updateSoundButtonUI() {
+  const btn = document.getElementById('soundToggleBtn');
+  const icon = document.getElementById('soundIcon');
+  if (!btn || !icon) return;
+  btn.classList.toggle('active', appState.soundEnabled);
+  icon.textContent = appState.soundEnabled ? '🔊' : '🔇';
+}
+
 // =============================================================================
-// 4. SCREEN WAKE LOCK
+// 5. WEB NOTIFICATIONS API (Off-app timer alerts)
 // =============================================================================
 
-let wakeLockSentinel = null;
+async function toggleNotifications() {
+  if (!('Notification' in window)) {
+    alert('Web Notifications are not supported in this browser. On iPhone, make sure the PWA is added to your Home Screen.');
+    return;
+  }
 
-async function requestWakeLock() {
-  if ('wakeLock' in navigator) {
+  if (Notification.permission === 'granted') {
+    appState.notificationsEnabled = !appState.notificationsEnabled;
+  } else {
     try {
-      wakeLockSentinel = await navigator.wakeLock.request('screen');
-      appState.screenAwake = true;
-      updateWakeLockButton();
-      wakeLockSentinel.addEventListener('release', () => {
-        appState.screenAwake = false;
-        updateWakeLockButton();
-      });
-    } catch (e) {}
+      const perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        appState.notificationsEnabled = true;
+      } else {
+        appState.notificationsEnabled = false;
+        alert('Notification permission was denied. You can enable notifications in iPhone Settings > Safari / Home Screen.');
+      }
+    } catch (err) {
+      console.warn('Error requesting notification permission:', err);
+    }
+  }
+
+  localStorage.setItem(STORAGE_KEYS.NOTIFS, appState.notificationsEnabled ? 'true' : 'false');
+  updateNotifButtonUI();
+
+  if (appState.notificationsEnabled) {
+    triggerTimerNotification('Notifications Active 🔔', 'You will receive alerts when rest timers and exercise sets complete.');
   }
 }
 
-async function releaseWakeLock() {
-  if (wakeLockSentinel) {
-    await wakeLockSentinel.release();
-    wakeLockSentinel = null;
-    appState.screenAwake = false;
-    updateWakeLockButton();
+function updateNotifButtonUI() {
+  const btn = document.getElementById('notifToggleBtn');
+  const icon = document.getElementById('notifIcon');
+  if (!btn || !icon) return;
+  btn.classList.toggle('active', appState.notificationsEnabled);
+  icon.textContent = appState.notificationsEnabled ? '🔔' : '🔕';
+}
+
+function triggerTimerNotification(title, body) {
+  if (!appState.notificationsEnabled) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  try {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, {
+          body,
+          icon: './icons/icon-192.png',
+          badge: './icons/icon-192.png',
+          vibrate: [200, 100, 200],
+          tag: 'strength-timer'
+        });
+      }).catch(() => {
+        new Notification(title, { body, icon: './icons/icon-192.png' });
+      });
+    } else {
+      new Notification(title, { body, icon: './icons/icon-192.png' });
+    }
+  } catch (err) {
+    console.warn('Notification failed:', err);
   }
+}
+
+// =============================================================================
+// 6. SCREEN WAKE LOCK & KEEPALIVE (Dual Native + Video Fallback for iOS)
+// =============================================================================
+
+let wakeLockSentinel = null;
+let wakeVideoElement = null;
+
+function ensureWakeVideo() {
+  if (wakeVideoElement) return;
+  const video = document.createElement('video');
+  video.setAttribute('playsinline', '');
+  video.setAttribute('webkit-playsinline', '');
+  video.setAttribute('muted', '');
+  video.setAttribute('loop', '');
+  video.muted = true;
+  video.loop = true;
+  video.style.position = 'fixed';
+  video.style.opacity = '0.001';
+  video.style.pointerEvents = 'none';
+  video.style.width = '1px';
+  video.style.height = '1px';
+  video.style.top = '0';
+  video.style.left = '0';
+  // 1-frame blank base64 video loop for iOS Safari keepalive
+  video.src = 'data:video/mp4;base64,AAAAHGZ0eXBtcDQyAAAAAG1wNDJpc29tYXZjMQAAADd2ZXJ0ZW1wdHkAAAAAAAAAAAAAAABtb292AAAAbG12aGQAAAAAAAAAAAAAAAAAAAPoAAAAAAABAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAA=';
+  document.body.appendChild(wakeVideoElement = video);
+}
+
+async function requestWakeLock() {
+  appState.screenAwake = true;
+  localStorage.setItem(STORAGE_KEYS.WAKE, 'true');
+  updateWakeLockButton();
+
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      wakeLockSentinel.addEventListener('release', () => {
+        if (appState.screenAwake && document.visibilityState === 'visible') {
+          requestWakeLock();
+        }
+      });
+    } catch (e) {
+      console.warn('Native wake lock failed, using video keepalive:', e);
+    }
+  }
+
+  try {
+    ensureWakeVideo();
+    if (wakeVideoElement) wakeVideoElement.play().catch(() => {});
+  } catch (e) {}
+}
+
+async function releaseWakeLock() {
+  appState.screenAwake = false;
+  localStorage.setItem(STORAGE_KEYS.WAKE, 'false');
+  updateWakeLockButton();
+
+  if (wakeLockSentinel) {
+    try { await wakeLockSentinel.release(); } catch (e) {}
+    wakeLockSentinel = null;
+  }
+  if (wakeVideoElement) {
+    try { wakeVideoElement.pause(); } catch (e) {}
+  }
+}
+
+function toggleWakeLock() {
+  if (appState.screenAwake) releaseWakeLock();
+  else requestWakeLock();
 }
 
 function updateWakeLockButton() {
   const btn = document.getElementById('wakeLockBtn');
-  if (btn) btn.classList.toggle('active', appState.screenAwake);
+  const icon = document.getElementById('wakeLockIcon');
+  if (!btn || !icon) return;
+  btn.classList.toggle('active', appState.screenAwake);
+  icon.textContent = appState.screenAwake ? '⚡' : '💤';
+  btn.title = appState.screenAwake ? 'Screen Awake: ON' : 'Screen Awake: OFF';
 }
 
 // =============================================================================
-// 5. SESSION CLOCK (45m Target / 49m Cap)
+// 7. LIGHT / DARK THEME TOGGLE
+// =============================================================================
+
+function toggleTheme() {
+  appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(STORAGE_KEYS.THEME, appState.theme);
+  applyTheme();
+}
+
+function applyTheme() {
+  const isLight = appState.theme === 'light';
+  document.body.classList.toggle('light-theme', isLight);
+  const themeIcon = document.getElementById('themeIcon');
+  if (themeIcon) {
+    themeIcon.textContent = isLight ? '🌙' : '☀️';
+  }
+  const themeBtn = document.getElementById('themeToggleBtn');
+  if (themeBtn) {
+    themeBtn.title = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+  }
+}
+
+// =============================================================================
+// 8. SESSION CLOCK (Timestamp Delta Timing)
 // =============================================================================
 
 let sessionIntervalId = null;
@@ -519,14 +716,14 @@ function updateSessionClock() {
 }
 
 // =============================================================================
-// 6. BUILD LINEAR STEPS
+// 9. BUILD LINEAR STEPS (Named Warmup Practice Exercise)
 // =============================================================================
 
 function buildLinearSteps(dayKey, isIntroPhase) {
   const program = WORKOUT_PROGRAMS[dayKey];
   const steps = [];
 
-  // PHASE 1: WARMUP (3 Steps)
+  // PHASE 1: WARMUP
   steps.push({
     type: 'warmup_cardio',
     phaseSubtitle: 'WARMUP • STEP 1 OF 3',
@@ -558,17 +755,22 @@ function buildLinearSteps(dayKey, isIntroPhase) {
     ]
   });
 
+  // Explicitly identify and illustrate the first exercise for practice!
+  const firstEx = program.exercises[0];
+  const firstExName = firstEx.name.toUpperCase();
+  const firstExPracticeTarget = firstEx.equipment === 'bodyweight' ? 'UNWEIGHTED' : '20–25 LB (LIGHT)';
+
   steps.push({
     type: 'warmup_practice',
     phaseSubtitle: 'WARMUP • STEP 3 OF 3',
-    title: 'LIGHT PRACTICE SETS',
-    illustration: 'warmup_practice',
-    equipment: 'dumbbell',
-    digitsDisplay: '02:00',
-    digitsCaption: '1–2 LIGHT PRACTICE SETS',
+    title: `${firstExName} (PRACTICE)`,
+    illustration: firstEx.illustration,
+    equipment: firstEx.equipment,
+    digitsDisplay: '1–2 SETS',
+    digitsCaption: `PRACTICE ${firstExName} • ${firstExPracticeTarget}`,
     isChecklist: true,
     formCues: [
-      '1–2 light practice sets of your first strength movement.',
+      `Do 1–2 light practice sets of ${firstEx.name} to grease the movement groove.`,
       'Practice sets prepare your nervous system and do NOT count as working sets.'
     ]
   });
@@ -710,7 +912,7 @@ function buildLinearSteps(dayKey, isIntroPhase) {
 }
 
 // =============================================================================
-// 7. FITNESS APP PLAYER RENDERER
+// 10. FITNESS APP PLAYER RENDERER
 // =============================================================================
 
 function startLinearWorkout() {
@@ -733,7 +935,11 @@ function renderCurrentPlayerStep() {
     return;
   }
 
-  // 1. Render Segmented Progress Bar (Matching reference app top dashes)
+  // Hide Rest UI & Preview
+  document.getElementById('nextExercisePreviewCard').style.display = 'none';
+  document.getElementById('restQuickAdjustRow').style.display = 'none';
+
+  // 1. Segmented Progress Bar
   renderSegmentedProgressBar();
 
   // 2. Equipment Badge
@@ -744,10 +950,11 @@ function renderCurrentPlayerStep() {
     eqIcon.innerHTML = `🏋️`;
   }
 
-  // 3. Visual Stage
+  // 3. Visual Stage (Exercise SVG with posture dots)
   const stage = document.getElementById('playerVisualStage');
-  if (stage && window.EXERCISE_ILLUSTRATIONS) {
-    stage.innerHTML = window.EXERCISE_ILLUSTRATIONS[step.illustration] || window.EXERCISE_ILLUSTRATIONS.warmup_cardio;
+  if (stage) {
+    const illuMap = window.EXERCISE_ILLUSTRATIONS || (typeof EXERCISE_ILLUSTRATIONS !== 'undefined' ? EXERCISE_ILLUSTRATIONS : {});
+    stage.innerHTML = illuMap[step.illustration] || illuMap.warmup_cardio || '';
   }
 
   // 4. Header Titles
@@ -768,7 +975,7 @@ function renderCurrentPlayerStep() {
     tipsList.innerHTML = (step.formCues || []).map(cue => `<li>${cue}</li>`).join('');
   }
 
-  // 7. Adjust Stepper Chips & Main Pill Action Button
+  // 7. Adjust Stepper Chips & Action Button
   const adjustBar = document.getElementById('quickAdjustBar');
   const actionText = document.getElementById('playerMainActionText');
   const actionIcon = document.getElementById('playerMainActionIcon');
@@ -782,7 +989,7 @@ function renderCurrentPlayerStep() {
     const currWeight = logged ? logged.weight : step.weight;
     const currReps = logged ? logged.reps : step.reps;
 
-    document.getElementById('playerWeightVal').textContent = `${currWeight} ${step.weightUnit ? step.weightUnit.replace('lb', '').trim() : ''} lb`;
+    document.getElementById('playerWeightVal').textContent = `${currWeight} lb`;
     document.getElementById('playerRepsVal').textContent = `${currReps} reps`;
     document.getElementById('adjustWeightLabel').textContent = `WEIGHT (${step.weightUnit || 'lb'})`;
 
@@ -810,9 +1017,7 @@ function renderSegmentedProgressBar() {
   const container = document.getElementById('segmentedProgressBar');
   if (!container) return;
 
-  const total = appState.linearSteps.length;
   const current = appState.currentStepIndex;
-
   container.innerHTML = appState.linearSteps.map((_, i) => {
     let cls = 'segment-dash';
     if (i < current) cls += ' completed';
@@ -821,13 +1026,12 @@ function renderSegmentedProgressBar() {
   }).join('');
 }
 
-// Smart Tips Dropdown
 function toggleSmartTips() {
   const dd = document.getElementById('smartTipsDropdown');
   if (dd) dd.classList.toggle('open');
 }
 
-// Steppers
+// Steppers (With Immediate Persistent Storage)
 function stepPlayerWeight(delta) {
   const step = appState.linearSteps[appState.currentStepIndex];
   if (!step) return;
@@ -838,6 +1042,9 @@ function stepPlayerWeight(delta) {
   const nextVal = Math.max(0, curr + delta);
   appState.loggedStepData[appState.currentStepIndex].weight = nextVal;
   step.weight = nextVal;
+
+  // Persist as new permanent default
+  persistExerciseDefault(step.exerciseId, nextVal, step.reps);
 
   document.getElementById('playerWeightVal').textContent = `${nextVal} lb`;
   document.getElementById('playerDigitsCaption').textContent = `TARGET: ${step.repRange} • ${nextVal} ${step.weightUnit.toUpperCase()}`;
@@ -854,6 +1061,9 @@ function stepPlayerReps(delta) {
   appState.loggedStepData[appState.currentStepIndex].reps = nextVal;
   step.reps = nextVal;
 
+  // Persist as new permanent default
+  persistExerciseDefault(step.exerciseId, step.weight, nextVal);
+
   document.getElementById('playerRepsVal').textContent = `${nextVal} reps`;
   document.getElementById('playerGiantDigits').textContent = `${nextVal} REPS`;
 }
@@ -864,7 +1074,6 @@ function playerMainActionClick() {
   if (!step) return;
 
   if (appState.isResting) {
-    // If resting, clicking button skips rest immediately
     skipRestPeriod();
     return;
   }
@@ -872,7 +1081,6 @@ function playerMainActionClick() {
   if (step.isTimed) {
     toggleTimedCountdown();
   } else {
-    // Completed lifting or checklist step
     handleStepCompleted();
   }
 }
@@ -882,16 +1090,21 @@ function handleStepCompleted() {
   if (!step) return;
 
   const logged = appState.loggedStepData[appState.currentStepIndex] || {};
+  const finalWeight = logged.weight !== undefined ? logged.weight : (step.weight || 0);
+  const finalReps = logged.reps !== undefined ? logged.reps : (step.reps || 8);
+
   appState.loggedStepData[appState.currentStepIndex] = {
     exerciseId: step.exerciseId,
-    weight: logged.weight !== undefined ? logged.weight : (step.weight || 0),
-    reps: logged.reps !== undefined ? logged.reps : (step.reps || 8),
+    weight: finalWeight,
+    reps: finalReps,
     completed: true
   };
 
-  playTone(659.25, 'sine', 0.12, 0.25); // done pip
+  // Permanently remember adjusted weight & reps for next session
+  persistExerciseDefault(step.exerciseId, finalWeight, finalReps);
 
-  // If this step has a rest period, show Rest Screen!
+  playTone(659.25, 'sine', 0.12, 0.25);
+
   if (step.restSeconds && step.restSeconds > 0) {
     startRestPeriod(step.restSeconds);
   } else {
@@ -900,60 +1113,112 @@ function handleStepCompleted() {
 }
 
 // =============================================================================
-// 8. REST PERIOD (In-Place Screen Matching Reference)
+// 11. REST PERIOD (Accurate Wall-Clock Timestamp & Next Exercise Preview)
 // =============================================================================
 
 function startRestPeriod(seconds) {
   appState.isResting = true;
-  restTimer.remainingSeconds = seconds;
   restTimer.totalSeconds = seconds;
+  restTimer.remainingSeconds = seconds;
+  restTimer.endTime = Date.now() + seconds * 1000;
   restTimer.isRunning = true;
 
-  // Visual Stage: Breathing rest graphic
-  const stage = document.getElementById('playerVisualStage');
-  if (stage && window.EXERCISE_ILLUSTRATIONS) {
-    stage.innerHTML = window.EXERCISE_ILLUSTRATIONS.rest_breathing;
-  }
-
   document.getElementById('quickAdjustBar').style.display = 'none';
+  document.getElementById('restQuickAdjustRow').style.display = 'flex';
 
   // Subtitle & Title
-  const nextStep = appState.linearSteps[appState.currentStepIndex + 1];
   document.getElementById('playerStepSubtitle').textContent = 'REST PERIOD';
   document.getElementById('playerExerciseTitle').textContent = 'CATCH YOUR BREATH';
 
-  // Digits in orange countdown
-  document.getElementById('playerGiantDigits').textContent = formatMinSec(seconds);
+  // Preview the NEXT exercise & weight count
+  const nextStep = appState.linearSteps[appState.currentStepIndex + 1];
+  const previewCard = document.getElementById('nextExercisePreviewCard');
+  const stage = document.getElementById('playerVisualStage');
+  const illuMap = window.EXERCISE_ILLUSTRATIONS || (typeof EXERCISE_ILLUSTRATIONS !== 'undefined' ? EXERCISE_ILLUSTRATIONS : {});
+
   if (nextStep) {
-    document.getElementById('playerDigitsCaption').textContent = `UP NEXT: ${nextStep.title}`;
+    // Show next exercise preview box
+    previewCard.style.display = 'flex';
+    document.getElementById('nextPreviewTitle').textContent = nextStep.title;
+    
+    if (nextStep.type === 'working_set') {
+      document.getElementById('nextPreviewSet').textContent = `SET ${nextStep.setNumber} OF ${nextStep.totalSets}`;
+      document.getElementById('nextPreviewWeight').textContent = `${nextStep.weight} ${nextStep.weightUnit ? nextStep.weightUnit.toUpperCase() : 'LB'}`;
+      document.getElementById('nextPreviewReps').textContent = `${nextStep.repRange} REPS`;
+      document.getElementById('nextPreviewStats').style.display = 'flex';
+    } else {
+      document.getElementById('nextPreviewSet').textContent = nextStep.phaseSubtitle;
+      document.getElementById('nextPreviewWeight').textContent = nextStep.digitsCaption || '';
+      document.getElementById('nextPreviewReps').textContent = '';
+    }
+
+    const firstCue = (nextStep.formCues && nextStep.formCues.length > 0) ? nextStep.formCues[0] : '';
+    document.getElementById('nextPreviewCue').textContent = firstCue;
+
+    document.getElementById('playerDigitsCaption').textContent = `UP NEXT: ${nextStep.title} (${nextStep.weight ? `${nextStep.weight} lb` : 'GET READY'})`;
+
+    // Render the NEXT exercise visual in stage so user sees form during rest!
+    if (stage && illuMap[nextStep.illustration]) {
+      stage.innerHTML = illuMap[nextStep.illustration];
+    }
   } else {
+    previewCard.style.display = 'none';
     document.getElementById('playerDigitsCaption').textContent = 'UP NEXT: WORKOUT COMPLETE';
+    if (stage && illuMap.rest_breathing) {
+      stage.innerHTML = illuMap.rest_breathing;
+    }
   }
+
+  // Display starting digits
+  document.getElementById('playerGiantDigits').textContent = formatMinSec(seconds);
 
   // Central Pill becomes SKIP REST
   document.getElementById('playerMainActionIcon').textContent = '⏩';
   document.getElementById('playerMainActionText').textContent = 'SKIP REST';
 
+  // High-frequency tick (recalculating from Date.now() for 100% off-app accuracy)
   if (restTimer.intervalId) clearInterval(restTimer.intervalId);
-  restTimer.intervalId = setInterval(() => {
-    if (restTimer.remainingSeconds > 0) {
-      restTimer.remainingSeconds--;
+  restTimer.intervalId = setInterval(tickRestTimer, 200);
+}
 
-      if (restTimer.remainingSeconds <= 3 && restTimer.remainingSeconds > 0) {
-        playPip();
-      }
+function tickRestTimer() {
+  if (!restTimer.isRunning || !restTimer.endTime) return;
+  const now = Date.now();
+  const leftMs = restTimer.endTime - now;
+  const remaining = Math.max(0, Math.ceil(leftMs / 1000));
 
-      document.getElementById('playerGiantDigits').textContent = formatMinSec(restTimer.remainingSeconds);
+  if (remaining !== restTimer.remainingSeconds) {
+    restTimer.remainingSeconds = remaining;
 
-      if (restTimer.remainingSeconds === 0) {
-        clearInterval(restTimer.intervalId);
-        restTimer.isRunning = false;
-        playFinishChime();
-        appState.isResting = false;
-        playerStepNext();
-      }
+    if (remaining <= 3 && remaining > 0) {
+      playPip();
     }
-  }, 1000);
+
+    document.getElementById('playerGiantDigits').textContent = formatMinSec(remaining);
+
+    if (remaining === 0) {
+      clearInterval(restTimer.intervalId);
+      restTimer.isRunning = false;
+      playFinishChime();
+
+      // Trigger Web Notification for background alert!
+      const nextStep = appState.linearSteps[appState.currentStepIndex + 1];
+      const nextName = nextStep ? nextStep.title : 'Workout';
+      const nextWeight = nextStep && nextStep.weight ? ` (${nextStep.weight} lb)` : '';
+      triggerTimerNotification('Rest Complete! ⏱️', `Time for ${nextName}${nextWeight}. Let's go!`);
+
+      appState.isResting = false;
+      playerStepNext();
+    }
+  }
+}
+
+function adjustRestTimer(deltaSec) {
+  if (!restTimer.isRunning || !restTimer.endTime) return;
+  restTimer.endTime += deltaSec * 1000;
+  const remaining = Math.max(0, Math.ceil((restTimer.endTime - Date.now()) / 1000));
+  restTimer.remainingSeconds = remaining;
+  document.getElementById('playerGiantDigits').textContent = formatMinSec(remaining);
 }
 
 function skipRestPeriod() {
@@ -963,10 +1228,12 @@ function skipRestPeriod() {
   playerStepNext();
 }
 
-// Timed Countdown (Carries, Treadmill, Stretches)
+// Timed Exercises (Farmer Carry, Treadmill, Stretches) with Timestamp Delta
 function setupTimedCountdown(seconds) {
   if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
+  timedExerciseTimer.totalSeconds = seconds;
   timedExerciseTimer.remainingSeconds = seconds;
+  timedExerciseTimer.endTime = null;
   timedExerciseTimer.isRunning = false;
 }
 
@@ -983,41 +1250,52 @@ function toggleTimedCountdown() {
   } else {
     // Start
     timedExerciseTimer.isRunning = true;
+    timedExerciseTimer.endTime = Date.now() + timedExerciseTimer.remainingSeconds * 1000;
     btnText.textContent = 'PAUSE';
     btnIcon.textContent = '⏸';
     playTone(587.33, 'sine', 0.1, 0.2);
 
-    timedExerciseTimer.intervalId = setInterval(() => {
-      if (timedExerciseTimer.remainingSeconds > 0) {
-        timedExerciseTimer.remainingSeconds--;
+    if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
+    timedExerciseTimer.intervalId = setInterval(tickTimedExercise, 200);
+  }
+}
 
-        if (timedExerciseTimer.remainingSeconds <= 3 && timedExerciseTimer.remainingSeconds > 0) {
-          playPip();
-        }
+function tickTimedExercise() {
+  if (!timedExerciseTimer.isRunning || !timedExerciseTimer.endTime) return;
+  const now = Date.now();
+  const leftMs = timedExerciseTimer.endTime - now;
+  const remaining = Math.max(0, Math.ceil(leftMs / 1000));
 
-        document.getElementById('playerGiantDigits').textContent = formatMinSec(timedExerciseTimer.remainingSeconds);
+  if (remaining !== timedExerciseTimer.remainingSeconds) {
+    timedExerciseTimer.remainingSeconds = remaining;
 
-        if (timedExerciseTimer.remainingSeconds === 0) {
-          clearInterval(timedExerciseTimer.intervalId);
-          timedExerciseTimer.isRunning = false;
-          playFinishChime();
+    if (remaining <= 3 && remaining > 0) {
+      playPip();
+    }
 
-          const step = appState.linearSteps[appState.currentStepIndex];
-          if (step && step.restSeconds) {
-            startRestPeriod(step.restSeconds);
-          } else {
-            playerStepNext();
-          }
-        }
+    document.getElementById('playerGiantDigits').textContent = formatMinSec(remaining);
+
+    if (remaining === 0) {
+      clearInterval(timedExerciseTimer.intervalId);
+      timedExerciseTimer.isRunning = false;
+      playFinishChime();
+
+      const step = appState.linearSteps[appState.currentStepIndex];
+      triggerTimerNotification('Time Up! 🔔', `${step ? step.title : 'Exercise'} is complete.`);
+
+      if (step && step.restSeconds) {
+        startRestPeriod(step.restSeconds);
+      } else {
+        playerStepNext();
       }
-    }, 1000);
+    }
   }
 }
 
 // Navigation
 function playerStepPrev() {
   if (appState.isResting) {
-    clearInterval(restTimer.intervalId);
+    if (restTimer.intervalId) clearInterval(restTimer.intervalId);
     appState.isResting = false;
   }
   if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
@@ -1030,7 +1308,7 @@ function playerStepPrev() {
 
 function playerStepNext() {
   if (appState.isResting) {
-    clearInterval(restTimer.intervalId);
+    if (restTimer.intervalId) clearInterval(restTimer.intervalId);
     appState.isResting = false;
   }
   if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
@@ -1044,7 +1322,6 @@ function playerStepNext() {
 }
 
 function quickSkipFinalSet() {
-  // Remove exercise 5 steps to preserve 45-min budget
   appState.linearSteps = appState.linearSteps.filter(step => {
     return !(step.phaseSubtitle && step.phaseSubtitle.includes('EXERCISE 5'));
   });
@@ -1066,7 +1343,60 @@ function confirmExitWorkout() {
 }
 
 // =============================================================================
-// 9. WORKOUT COMPLETE & PROGRESSION
+// 12. APP LIFECYCLE & BACKGROUND VISIBILITY LISTENER
+// =============================================================================
+
+// Immediate sync when user returns from other apps / locks screen
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    const now = Date.now();
+
+    // 1. Sync Rest Timer
+    if (restTimer.isRunning && restTimer.endTime) {
+      if (now >= restTimer.endTime) {
+        clearInterval(restTimer.intervalId);
+        restTimer.isRunning = false;
+        playFinishChime();
+        appState.isResting = false;
+        playerStepNext();
+      } else {
+        restTimer.remainingSeconds = Math.max(0, Math.ceil((restTimer.endTime - now) / 1000));
+        document.getElementById('playerGiantDigits').textContent = formatMinSec(restTimer.remainingSeconds);
+      }
+    }
+
+    // 2. Sync Timed Exercise Timer
+    if (timedExerciseTimer.isRunning && timedExerciseTimer.endTime) {
+      if (now >= timedExerciseTimer.endTime) {
+        clearInterval(timedExerciseTimer.intervalId);
+        timedExerciseTimer.isRunning = false;
+        playFinishChime();
+        const step = appState.linearSteps[appState.currentStepIndex];
+        if (step && step.restSeconds) {
+          startRestPeriod(step.restSeconds);
+        } else {
+          playerStepNext();
+        }
+      } else {
+        timedExerciseTimer.remainingSeconds = Math.max(0, Math.ceil((timedExerciseTimer.endTime - now) / 1000));
+        document.getElementById('playerGiantDigits').textContent = formatMinSec(timedExerciseTimer.remainingSeconds);
+      }
+    }
+
+    // 3. Sync Session Clock
+    if (appState.sessionActive) {
+      updateSessionClock();
+    }
+
+    // 4. Re-acquire WakeLock if screen awake is active
+    if (appState.screenAwake) {
+      requestWakeLock();
+    }
+  }
+});
+
+// =============================================================================
+// 13. WORKOUT COMPLETE & DOUBLE PROGRESSION
 // =============================================================================
 
 function completeFullWorkout() {
@@ -1091,7 +1421,7 @@ function completeFullWorkout() {
   history.push(sessionRecord);
   localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
 
-  // Double Progression
+  // Double Progression Tracker
   const progression = getStoredProgression();
   program.exercises.forEach(ex => {
     const sets = Object.values(appState.loggedStepData).filter(s => s && s.exerciseId === ex.id && s.completed);
@@ -1113,21 +1443,13 @@ function completeFullWorkout() {
   });
   saveProgressionData(progression);
 
-  alert(`🎉 Workout Complete!\n• Time: ${totalMins} minutes (Target 45m)\n• All exercises logged.`);
+  alert(`🎉 Workout Complete!\n• Time: ${totalMins} minutes (Target: 45m)\n• All weights and reps saved permanently.`);
 
   document.getElementById('linearWorkoutView').classList.remove('active');
   document.getElementById('homeSetupView').style.display = 'block';
   renderHomeExercisePreview();
   renderHistoryTab();
   updateWeeklyCardioStats();
-}
-
-function getPastExerciseStats(exId) {
-  const prog = getStoredProgression();
-  if (prog[exId]) {
-    return { weight: prog[exId].currentWeight, reps: 8 };
-  }
-  return null;
 }
 
 function getStoredProgression() {
@@ -1151,7 +1473,7 @@ function getStoredHistory() {
 }
 
 // =============================================================================
-// 10. HOME & TABS
+// 14. HOME & TABS
 // =============================================================================
 
 function renderHomeExercisePreview() {
@@ -1164,10 +1486,16 @@ function renderHomeExercisePreview() {
   if (container) {
     container.innerHTML = program.exercises.map((ex, i) => {
       const sets = appState.introPhase ? ex.introSets : ex.defaultSets;
+      const past = getPastExerciseStats(ex.id);
+      const w = past ? past.weight : ex.defaultWeight;
+      const weightDisplay = w > 0 ? `${w} lb` : 'bodyweight';
+
       return `
         <div class="preview-row">
           <span>${i + 1}. <strong>${ex.name}</strong></span>
-          <span style="font-size: 0.78rem; color: #ff5722; font-weight: 700;">${sets} × ${ex.repRange}</span>
+          <span style="font-size: 0.78rem; color: #ff5722; font-weight: 700;">
+            ${sets} × ${ex.repRange} (${weightDisplay})
+          </span>
         </div>
       `;
     }).join('');
@@ -1194,7 +1522,7 @@ function switchTab(tabId) {
 }
 
 // =============================================================================
-// 11. OUTDOOR HIKING & CARDIO
+// 15. OUTDOOR HIKING & CARDIO
 // =============================================================================
 
 function getStoredOutdoorLogs() {
@@ -1306,7 +1634,7 @@ function renderOutdoorLogs() {
 }
 
 // =============================================================================
-// 12. HISTORY & EXPORT
+// 16. HISTORY & EXPORT
 // =============================================================================
 
 function renderHistoryTab() {
@@ -1337,6 +1665,7 @@ function exportDataJSON() {
     history: getStoredHistory(),
     outdoor: getStoredOutdoorLogs(),
     progression: getStoredProgression(),
+    defaults: getStoredExerciseDefaults(),
     exportedAt: new Date().toISOString()
   };
   const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
@@ -1362,8 +1691,10 @@ function handleFileImport(e) {
       if (data.history) localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(data.history));
       if (data.outdoor) localStorage.setItem(STORAGE_KEYS.OUTDOOR, JSON.stringify(data.outdoor));
       if (data.progression) localStorage.setItem(STORAGE_KEYS.PROGRESSION, JSON.stringify(data.progression));
+      if (data.defaults) localStorage.setItem(STORAGE_KEYS.DEFAULTS, JSON.stringify(data.defaults));
       alert('✅ Backup restored successfully!');
       renderHistoryTab();
+      renderHomeExercisePreview();
       updateWeeklyCardioStats();
     } catch (err) {
       alert('❌ Error reading backup file.');
@@ -1393,10 +1724,27 @@ function autoDetectDay() {
   return 'monday';
 }
 
-// Initialization
-window.addEventListener('DOMContentLoaded', () => {
-  appState.currentDay = autoDetectDay();
+// =============================================================================
+// 17. APP INITIALIZATION
+// =============================================================================
 
+window.addEventListener('DOMContentLoaded', () => {
+  // Load preferences
+  appState.currentDay = autoDetectDay();
+  appState.theme = localStorage.getItem(STORAGE_KEYS.THEME) || 'dark';
+  applyTheme();
+
+  appState.soundEnabled = localStorage.getItem(STORAGE_KEYS.SOUND) !== 'false';
+  updateSoundButtonUI();
+
+  appState.notificationsEnabled = localStorage.getItem(STORAGE_KEYS.NOTIFS) === 'true';
+  updateNotifButtonUI();
+
+  appState.screenAwake = localStorage.getItem(STORAGE_KEYS.WAKE) !== 'false';
+  updateWakeLockButton();
+  if (appState.screenAwake) requestWakeLock();
+
+  // Day buttons
   document.querySelectorAll('.day-tab-btn').forEach(btn => {
     const day = btn.getAttribute('data-day');
     btn.classList.toggle('active', day === appState.currentDay);
@@ -1416,27 +1764,6 @@ window.addEventListener('DOMContentLoaded', () => {
       renderHomeExercisePreview();
     });
   }
-
-  const soundBtn = document.getElementById('soundToggleBtn');
-  if (soundBtn) {
-    soundBtn.addEventListener('click', () => {
-      appState.soundEnabled = !appState.soundEnabled;
-      soundBtn.classList.toggle('active', appState.soundEnabled);
-      document.getElementById('soundIcon').textContent = appState.soundEnabled ? '🔔' : '🔕';
-      if (appState.soundEnabled) playTone(880, 'sine', 0.1, 0.2);
-    });
-  }
-
-  const wakeBtn = document.getElementById('wakeLockBtn');
-  if (wakeBtn) {
-    wakeBtn.addEventListener('click', () => {
-      if (appState.screenAwake) releaseWakeLock();
-      else requestWakeLock();
-    });
-  }
-
-  const infoBtn = document.getElementById('infoModalBtn');
-  if (infoBtn) infoBtn.addEventListener('click', () => openModal('infoModal'));
 
   renderHomeExercisePreview();
   renderHistoryTab();

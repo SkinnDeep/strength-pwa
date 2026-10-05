@@ -35,6 +35,82 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Light Mode Theme */
+body.light-theme {
+  --bg-app: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-card-elevated: #f8fafc;
+  --bg-input: #f1f5f9;
+  
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-orange: rgba(255, 87, 34, 0.5);
+}
+
+body.light-theme .header-bar {
+  background: rgba(241, 245, 249, 0.94);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.light-theme .brand-title {
+  color: #0f172a;
+}
+body.light-theme .icon-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #475569;
+}
+body.light-theme .player-card-shell {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.light-theme .player-visual-stage {
+  background: #f8fafc;
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+body.light-theme .player-exercise-title {
+  color: #0f172a;
+}
+body.light-theme .smart-tips-pill {
+  background: rgba(0, 0, 0, 0.04);
+  color: #334155;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.light-theme .smart-tips-dropdown {
+  background: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.light-theme .smart-tips-dropdown ul {
+  color: #1e293b;
+}
+body.light-theme .chip-stepper span {
+  color: #0f172a;
+}
+body.light-theme .bottom-nav {
+  background: rgba(241, 245, 249, 0.94);
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+body.light-theme .home-workout-card {
+  background: #ffffff;
+}
+body.light-theme .home-title {
+  color: #0f172a;
+}
+body.light-theme .preview-row strong {
+  color: #0f172a;
+}
+body.light-theme .toggle-title {
+  color: #0f172a;
+}
+body.light-theme .modal-box {
+  background: #ffffff;
+}
+body.light-theme .modal-title {
+  color: #0f172a;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -55,6 +131,7 @@ body {
   overflow-x: hidden;
   user-select: none;
   -webkit-user-select: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 input, textarea, select {
@@ -580,6 +657,94 @@ input:checked + .slider:before { transform: translateX(19px); }
   font-size: 0.95rem;
   font-weight: 800;
   color: #fff;
+}
+
+/* Next Exercise Preview Box during Rest */
+.next-exercise-preview-card {
+  width: 100%;
+  background: rgba(255, 87, 34, 0.08);
+  border: 1px solid rgba(255, 87, 34, 0.35);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.next-preview-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #ff5722;
+  letter-spacing: 0.08em;
+}
+
+.next-preview-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+body.light-theme .next-preview-title {
+  color: #0f172a;
+}
+
+.next-preview-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin: 2px 0;
+}
+
+.next-preview-stats span {
+  background: rgba(0, 0, 0, 0.35);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+body.light-theme .next-preview-stats span {
+  background: rgba(255, 255, 255, 0.9);
+  color: #b45309;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.next-preview-cue {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* Rest Adjust Row (-15s, +15s) */
+.rest-quick-adjust-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.rest-adjust-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.rest-adjust-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.18);
+}
+body.light-theme .rest-adjust-btn {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0f172a;
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 /* 7. Transport Bar (Matching |<  [ || ]  >| from user screenshot) */

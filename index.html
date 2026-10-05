@@ -30,16 +30,24 @@
         <span class="brand-title">Strength & Hike</span>
       </div>
       <div class="header-actions">
-        <!-- Sound Toggle -->
-        <button id="soundToggleBtn" class="icon-btn active" title="Toggle Sound" aria-label="Toggle Sound">
-          <span id="soundIcon">🔔</span>
+        <!-- Timer Notification Toggle -->
+        <button id="notifToggleBtn" class="icon-btn" title="Timer Notifications (when app is in background)" aria-label="Notifications" onclick="toggleNotifications()">
+          <span id="notifIcon">🔔</span>
         </button>
-        <!-- Wake Lock Indicator -->
-        <button id="wakeLockBtn" class="icon-btn" title="Keep Screen Awake" aria-label="Screen Awake">
-          <span id="wakeLockIcon">☀️</span>
+        <!-- Light / Dark Mode Toggle -->
+        <button id="themeToggleBtn" class="icon-btn" title="Toggle Light / Dark Mode" aria-label="Theme" onclick="toggleTheme()">
+          <span id="themeIcon">☀️</span>
         </button>
-        <!-- Info & Install Guide -->
-        <button id="infoModalBtn" class="icon-btn" title="Hosting & Install Guide" aria-label="Info">
+        <!-- Audio Chimes & Pips Toggle -->
+        <button id="soundToggleBtn" class="icon-btn active" title="Audio Chimes & Pips" aria-label="Sound" onclick="toggleSound()">
+          <span id="soundIcon">🔊</span>
+        </button>
+        <!-- Keep Screen Awake Toggle -->
+        <button id="wakeLockBtn" class="icon-btn active" title="Keep Screen Awake" aria-label="Screen Awake" onclick="toggleWakeLock()">
+          <span id="wakeLockIcon">⚡</span>
+        </button>
+        <!-- Info & Routine Guide -->
+        <button id="infoModalBtn" class="icon-btn" title="Hosting & Install Guide" aria-label="Info" onclick="openModal('infoModal')">
           <span>ℹ️</span>
         </button>
       </div>
@@ -175,7 +183,25 @@
               <ul id="smartTipsList"></ul>
             </div>
 
-            <!-- 6. Quick Weight & Rep Stepper Chips -->
+            <!-- Next Exercise Preview Box (Displayed during Rest Period) -->
+            <div id="nextExercisePreviewCard" class="next-exercise-preview-card" style="display: none;">
+              <span class="next-preview-badge">UP NEXT</span>
+              <div class="next-preview-title" id="nextPreviewTitle">SMITH BENCH PRESS</div>
+              <div class="next-preview-stats" id="nextPreviewStats">
+                <span id="nextPreviewSet">SET 1 OF 3</span>
+                <span id="nextPreviewWeight">85 LB TOTAL</span>
+                <span id="nextPreviewReps">6–10 REPS</span>
+              </div>
+              <div class="next-preview-cue" id="nextPreviewCue">Set Smith safety stops just above chest before lifting.</div>
+            </div>
+
+            <!-- Quick Rest Adjustment Row (-15s / +15s, shown during Rest) -->
+            <div id="restQuickAdjustRow" class="rest-quick-adjust-row" style="display: none;">
+              <button class="rest-adjust-btn" onclick="adjustRestTimer(-15)">−15s</button>
+              <button class="rest-adjust-btn" onclick="adjustRestTimer(15)">+15s</button>
+            </div>
+
+            <!-- 6. Quick Weight & Rep Stepper Chips (Active during lifting sets) -->
             <div class="quick-adjust-bar" id="quickAdjustBar">
               <div class="adjust-chip">
                 <span class="adjust-label" id="adjustWeightLabel">WEIGHT</span>
@@ -386,12 +412,20 @@
           <strong>Target:</strong> 45 minutes; maximum 49 minutes.<br>
           • 6m Warmup • ~27m Strength • 7m Cardio • 5m Cooldown
         </p>
-        <ul style="padding-left: 18px; font-size: 0.82rem; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
+        <ul style="padding-left: 18px; font-size: 0.82rem; display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
           <li><strong>DB:</strong> Dumbbell weights are per hand unless marked "total".</li>
           <li><strong>RIR 2:</strong> Finish each lifting set with about 2 good reps left.</li>
-          <li><strong>Pacing:</strong> Never rush reps. If behind schedule, skip Set 5.</li>
+          <li><strong>Pacing:</strong> Never rush reps. If behind schedule, tap <em>Skip Set 5</em>.</li>
           <li><strong>Pain:</strong> Stop immediately if joint or sharp pain occurs.</li>
         </ul>
+        <div style="background: rgba(255,87,34,0.1); border: 1px solid var(--border-orange); border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; line-height: 1.4;">
+          <strong>⏱️ Is 2 Minutes Too Long For Rest?</strong><br>
+          For heavy compound squats and presses (Goblet Squat, Smith Bench, Split Squat), 2 minutes is the scientific sweet spot allowing your nervous system and ATP energy stores to recover ~95%. This ensures you hit your 6–10 rep target with good form on later sets.<br>
+          <em style="color: var(--primary-orange); display: block; margin-top: 4px;">Feel fully recovered earlier? Simply tap <strong>[ ⏩ SKIP REST ]</strong> or <strong>−15s</strong> anytime!</em>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; font-size: 0.78rem;">
+          🔔 <strong>Timer Notifications:</strong> Tap the 🔔 icon in the top header to enable notifications so your iPhone buzzes/alerts you when rest timers finish even if you leave the app.
+        </div>
       </div>
       <button class="big-start-btn" style="padding: 12px;" onclick="closeModal('infoModal')">Close</button>
     </div>

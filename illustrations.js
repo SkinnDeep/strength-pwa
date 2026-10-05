@@ -3,7 +3,7 @@
  * Matches the reference app design: Athletic silhouettes with orange joint nodes & alignment lines
  */
 
-const EXERCISE_ILLUSTRATIONS = {
+window.EXERCISE_ILLUSTRATIONS = {
   // 1. Warmup Walk / Bike
   warmup_cardio: `
     <svg viewBox="0 0 280 180" class="exercise-svg">
@@ -545,3 +545,4 @@ const EXERCISE_ILLUSTRATIONS = {
     </svg>
   `
 };
+var EXERCISE_ILLUSTRATIONS = window.EXERCISE_ILLUSTRATIONS;
