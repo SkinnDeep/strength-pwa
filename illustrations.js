@@ -1,7 +1,147 @@
 /**
- * High-Quality Biomechanical Exercise Illustrations
- * Matches the reference app design: Athletic silhouettes with orange joint nodes & alignment lines
+ * High-Quality Biomechanical Exercise Visuals & Real Motion Media
+ * Features:
+ * 1. Curated real animated demonstration GIFs / photos (modest, athletic gym attire)
+ * 2. Biomechanical vector animations with orange joint nodes & form lines as fallback
  */
+
+window.EXERCISE_MEDIA = {
+  // Monday
+  goblet_squat: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-goblet-squat.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Goblet_Squat/0.jpg',
+    title: 'Goblet Squat'
+  },
+  smith_bench: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/smith-bench-press.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Bench_Press/0.jpg',
+    title: 'Smith Bench Press'
+  },
+  cable_row: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/cable-seated-row.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Cable_Rows/0.jpg',
+    title: 'Cable Seated Row'
+  },
+  db_rdl: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/dumbbell-romanian-deadlift.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg',
+    title: 'DB Romanian Deadlift'
+  },
+  farmer_carry: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/farmers-walk.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Farmers_Walk/0.jpg',
+    title: 'Farmer Carry'
+  },
+
+  // Wednesday
+  split_squat: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/band-one-arm-single-leg-split-squat.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Split_Squats/0.jpg',
+    title: 'Supported Split Squat'
+  },
+  seated_db_ohp: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/delts/dumbbell-seated-shoulder-press.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Dumbbell_Press/0.jpg',
+    title: 'Seated DB Overhead Press'
+  },
+  lat_pulldown: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/cable-lat-pulldown-full-range-of-motion.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/0.jpg',
+    title: 'Lat Pulldown'
+  },
+  pallof_press: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/band-horizontal-pallof-press.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pallof_Press/0.jpg',
+    title: 'Pallof Press'
+  },
+
+  // Friday
+  flat_db_bench: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/dumbbell-bench-press.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/0.jpg',
+    title: 'Flat DB Bench Press'
+  },
+  single_arm_db_row: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/dumbbell-one-arm-bent-over-row.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/0.jpg',
+    title: 'Single-Arm DB Row'
+  },
+  standing_db_calf_raise: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/dumbbell-standing-calf-raise.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Dumbbell_Calf_Raise/0.jpg',
+    title: 'Standing DB Calf Raise'
+  },
+  suitcase_carry: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/farmers-walk.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Farmers_Walk/0.jpg',
+    title: 'Suitcase Carry'
+  },
+
+  // Cardio & Warmup & Cooldown
+  cardio_incline: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/cardio/walking-on-incline-treadmill.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Walking_Treadmill/0.jpg',
+    title: 'Incline Treadmill Walk'
+  },
+  cardio_bike: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/cardio/stationary-bike-run-v-3.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bicycling_Stationary/0.jpg',
+    title: 'Stationary Bike / Elliptical'
+  },
+  warmup_cardio: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/cardio/walking-on-incline-treadmill.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Walking_Treadmill/0.jpg',
+    title: 'Treadmill / Bike Warmup'
+  },
+  warmup_mobility: {
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bodyweight_Walking_Lunge/0.jpg',
+    title: 'Dynamic Mobility Drill'
+  },
+  warmup_practice: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-goblet-squat.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Goblet_Squat/0.jpg',
+    title: 'Warmup Practice Set'
+  },
+  stretch_calf: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/calf-push-stretch-with-hands-against-wall.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Calf_Stretch_Hands_Against_Wall/0.jpg',
+    title: 'Calf Stretch'
+  },
+  stretch_hip_flexor: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/intermediate-hip-flexor-and-quad-stretch.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Intermediate_Hip_Flexor_and_Quad_Stretch/0.jpg',
+    title: 'Hip Flexor Stretch'
+  },
+  stretch_chest: {
+    gif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/behind-head-chest-stretch.gif',
+    photo: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dynamic_Chest_Stretch/0.jpg',
+    title: 'Chest Stretch'
+  }
+};
+
+window.renderExerciseVisualMarkup = function(key) {
+  const media = window.EXERCISE_MEDIA ? window.EXERCISE_MEDIA[key] : null;
+  const svgMap = window.EXERCISE_ILLUSTRATIONS || {};
+  const fallbackSvg = svgMap[key] || svgMap.warmup_cardio || '';
+
+  if (!media) {
+    return fallbackSvg;
+  }
+
+  const srcUrl = media.gif || media.photo;
+  if (!srcUrl) return fallbackSvg;
+
+  return `
+    <div class="exercise-media-wrapper">
+      <img src="${srcUrl}" 
+           alt="${media.title || 'Exercise Demonstration'}" 
+           class="exercise-real-media"
+           loading="eager"
+           onerror="this.onerror=null; this.parentElement.innerHTML=\`${fallbackSvg.replace(/`/g, '\\`')}\`;" />
+      <span class="media-live-badge">ANIMATED FORM</span>
+    </div>
+  `;
+};
 
 window.EXERCISE_ILLUSTRATIONS = {
   // 1. Warmup Walk / Bike

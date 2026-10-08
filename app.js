@@ -428,48 +428,129 @@ function getPastExerciseStats(exId) {
 }
 
 // =============================================================================
-// 4. AUDIO SYNTHESIZER
+// 4. AUDIO SYNTHESIZER & IOS AUDIO KEEPALIVE
 // =============================================================================
 
 let audioCtx = null;
+let silentAudioLoop = null;
+
+// Pre-synthesize clean self-contained 8-bit WAV audio data for native iOS HTML5 Audio
+function createAudioWavUri(frequency, durationSec, type = 'sine', sampleRate = 8000) {
+  const numSamples = Math.floor(sampleRate * durationSec);
+  const buffer = new Uint8Array(44 + numSamples);
+  const view = new DataView(buffer.buffer);
+
+  // RIFF header
+  buffer.set([0x52, 0x49, 0x46, 0x46], 0); // "RIFF"
+  view.setUint32(4, 36 + numSamples, true);
+  buffer.set([0x57, 0x41, 0x56, 0x45], 8); // "WAVE"
+  buffer.set([0x66, 0x6d, 0x74, 0x20], 12); // "fmt "
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, 1, true); // Mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate, true);
+  view.setUint16(32, 1, true);
+  view.setUint16(34, 8, true); // 8-bit
+  buffer.set([0x64, 0x61, 0x74, 0x61], 36); // "data"
+  view.setUint32(40, numSamples, true);
+
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    let s = 0;
+    if (type === 'sine') {
+      s = Math.sin(2 * Math.PI * frequency * t);
+    } else if (type === 'chime') {
+      s = 0.5 * Math.sin(2 * Math.PI * 523.25 * t) +
+          0.3 * Math.sin(2 * Math.PI * 659.25 * t) +
+          0.2 * Math.sin(2 * Math.PI * 783.99 * t);
+    } else if (type === 'silence') {
+      s = 0;
+    }
+    const env = type === 'silence' ? 1 : Math.exp(-3 * t / durationSec);
+    const val = Math.floor(128 + 120 * s * env);
+    buffer[44 + i] = Math.max(0, Math.min(255, val));
+  }
+
+  let binary = '';
+  const len = buffer.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(buffer[i]);
+  }
+  return 'data:audio/wav;base64,' + btoa(binary);
+}
+
+// Pre-rendered Audio URIs
+const BEEP_WAV_URI = createAudioWavUri(880, 0.12, 'sine');
+const CHIME_WAV_URI = createAudioWavUri(659.25, 0.65, 'chime');
+const SILENT_WAV_URI = createAudioWavUri(0, 1.0, 'silence');
+
+// iOS HTML5 Audio pool for instant non-muted playback even when app backgrounded
+const pipAudio = new Audio(BEEP_WAV_URI);
+pipAudio.preload = 'auto';
+const chimeAudio = new Audio(CHIME_WAV_URI);
+chimeAudio.preload = 'auto';
 
 function getAudioContext() {
   if (!audioCtx) {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (AudioContext) audioCtx = new AudioContext();
+    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtxClass) audioCtx = new AudioCtxClass();
   }
-  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+  ensureSilentAudioLoop();
   return audioCtx;
+}
+
+// iOS Background Keepalive Audio Track
+function ensureSilentAudioLoop() {
+  if (!silentAudioLoop) {
+    silentAudioLoop = new Audio(SILENT_WAV_URI);
+    silentAudioLoop.loop = true;
+    silentAudioLoop.volume = 0.01; // Tiny volume keeps audio hardware active without draining battery
+  }
+  if (appState.sessionActive && silentAudioLoop.paused) {
+    silentAudioLoop.play().catch(() => {});
+  }
 }
 
 function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.25) {
   if (!appState.soundEnabled) return;
   try {
     const ctx = getAudioContext();
-    if (!ctx) return;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    gain.gain.setValueAtTime(gainVal, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime + duration);
+    if (ctx && ctx.state === 'running') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    }
   } catch (err) {}
 }
 
 function playPip() {
+  if (!appState.soundEnabled) return;
+  // Dual-trigger: Web Audio API (if active) + HTML5 Audio element (survives iOS backgrounding)
+  try {
+    pipAudio.currentTime = 0;
+    pipAudio.play().catch(() => {});
+  } catch (e) {}
   playTone(880, 'sine', 0.1, 0.3);
   if (navigator.vibrate) navigator.vibrate(50);
 }
 
 function playFinishChime() {
   if (!appState.soundEnabled) return;
+  try {
+    chimeAudio.currentTime = 0;
+    chimeAudio.play().catch(() => {});
+  } catch (e) {}
   playTone(523.25, 'triangle', 0.22, 0.35); // C5
   setTimeout(() => playTone(659.25, 'triangle', 0.22, 0.35), 140); // E5
   setTimeout(() => playTone(783.99, 'triangle', 0.45, 0.4), 280); // G5
@@ -488,7 +569,7 @@ function toggleSound() {
   appState.soundEnabled = !appState.soundEnabled;
   localStorage.setItem(STORAGE_KEYS.SOUND, appState.soundEnabled ? 'true' : 'false');
   updateSoundButtonUI();
-  if (appState.soundEnabled) playTone(880, 'sine', 0.1, 0.2);
+  if (appState.soundEnabled) playPip();
 }
 
 function updateSoundButtonUI() {
@@ -692,6 +773,9 @@ function stopSessionClock() {
     sessionIntervalId = null;
   }
   appState.sessionActive = false;
+  if (silentAudioLoop) {
+    try { silentAudioLoop.pause(); } catch (e) {}
+  }
   releaseWakeLock();
 }
 
@@ -921,6 +1005,7 @@ function startLinearWorkout() {
   appState.isResting = false;
   appState.loggedStepData = {};
 
+  document.body.classList.add('workout-active');
   document.getElementById('homeSetupView').style.display = 'none';
   document.getElementById('linearWorkoutView').classList.add('active');
 
@@ -950,11 +1035,15 @@ function renderCurrentPlayerStep() {
     eqIcon.innerHTML = `🏋️`;
   }
 
-  // 3. Visual Stage (Exercise SVG with posture dots)
+  // 3. Visual Stage (Real Demonstration Motion GIF / Photo with fallback)
   const stage = document.getElementById('playerVisualStage');
   if (stage) {
-    const illuMap = window.EXERCISE_ILLUSTRATIONS || (typeof EXERCISE_ILLUSTRATIONS !== 'undefined' ? EXERCISE_ILLUSTRATIONS : {});
-    stage.innerHTML = illuMap[step.illustration] || illuMap.warmup_cardio || '';
+    if (typeof window.renderExerciseVisualMarkup === 'function') {
+      stage.innerHTML = window.renderExerciseVisualMarkup(step.illustration);
+    } else {
+      const illuMap = window.EXERCISE_ILLUSTRATIONS || {};
+      stage.innerHTML = illuMap[step.illustration] || illuMap.warmup_cardio || '';
+    }
   }
 
   // 4. Header Titles
@@ -1031,7 +1120,7 @@ function toggleSmartTips() {
   if (dd) dd.classList.toggle('open');
 }
 
-// Steppers (With Immediate Persistent Storage)
+// Steppers (With Immediate Persistent Storage & Automatic Carryover to Subsequent Sets)
 function stepPlayerWeight(delta) {
   const step = appState.linearSteps[appState.currentStepIndex];
   if (!step) return;
@@ -1043,8 +1132,24 @@ function stepPlayerWeight(delta) {
   appState.loggedStepData[appState.currentStepIndex].weight = nextVal;
   step.weight = nextVal;
 
-  // Persist as new permanent default
+  // Persist as new permanent default for this exercise
   persistExerciseDefault(step.exerciseId, nextVal, step.reps);
+
+  // Automatically propagate to all SUBSEQUENT sets of this same exercise in this workout!
+  if (step.exerciseId) {
+    for (let i = appState.currentStepIndex + 1; i < appState.linearSteps.length; i++) {
+      const futureStep = appState.linearSteps[i];
+      if (futureStep.exerciseId === step.exerciseId) {
+        futureStep.weight = nextVal;
+        futureStep.digitsCaption = `TARGET: ${futureStep.repRange} • ${nextVal} ${futureStep.weightUnit ? futureStep.weightUnit.toUpperCase() : 'LB'}`;
+        if (!appState.loggedStepData[i]) {
+          appState.loggedStepData[i] = { weight: nextVal, reps: futureStep.reps };
+        } else {
+          appState.loggedStepData[i].weight = nextVal;
+        }
+      }
+    }
+  }
 
   document.getElementById('playerWeightVal').textContent = `${nextVal} lb`;
   document.getElementById('playerDigitsCaption').textContent = `TARGET: ${step.repRange} • ${nextVal} ${step.weightUnit.toUpperCase()}`;
@@ -1061,8 +1166,26 @@ function stepPlayerReps(delta) {
   appState.loggedStepData[appState.currentStepIndex].reps = nextVal;
   step.reps = nextVal;
 
-  // Persist as new permanent default
+  // Persist as new permanent default for this exercise
   persistExerciseDefault(step.exerciseId, step.weight, nextVal);
+
+  // Automatically propagate to all SUBSEQUENT sets of this same exercise in this workout!
+  if (step.exerciseId) {
+    for (let i = appState.currentStepIndex + 1; i < appState.linearSteps.length; i++) {
+      const futureStep = appState.linearSteps[i];
+      if (futureStep.exerciseId === step.exerciseId) {
+        futureStep.reps = nextVal;
+        if (!futureStep.isTimed) {
+          futureStep.digitsDisplay = `${nextVal} REPS`;
+        }
+        if (!appState.loggedStepData[i]) {
+          appState.loggedStepData[i] = { weight: futureStep.weight, reps: nextVal };
+        } else {
+          appState.loggedStepData[i].reps = nextVal;
+        }
+      }
+    }
+  }
 
   document.getElementById('playerRepsVal').textContent = `${nextVal} reps`;
   document.getElementById('playerGiantDigits').textContent = `${nextVal} REPS`;
@@ -1158,8 +1281,12 @@ function startRestPeriod(seconds) {
     document.getElementById('playerDigitsCaption').textContent = `UP NEXT: ${nextStep.title} (${nextStep.weight ? `${nextStep.weight} lb` : 'GET READY'})`;
 
     // Render the NEXT exercise visual in stage so user sees form during rest!
-    if (stage && illuMap[nextStep.illustration]) {
-      stage.innerHTML = illuMap[nextStep.illustration];
+    if (stage) {
+      if (typeof window.renderExerciseVisualMarkup === 'function') {
+        stage.innerHTML = window.renderExerciseVisualMarkup(nextStep.illustration);
+      } else if (illuMap[nextStep.illustration]) {
+        stage.innerHTML = illuMap[nextStep.illustration];
+      }
     }
   } else {
     previewCard.style.display = 'none';
@@ -1296,9 +1423,13 @@ function tickTimedExercise() {
 function playerStepPrev() {
   if (appState.isResting) {
     if (restTimer.intervalId) clearInterval(restTimer.intervalId);
+    restTimer.isRunning = false;
     appState.isResting = false;
   }
-  if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
+  if (timedExerciseTimer.intervalId) {
+    clearInterval(timedExerciseTimer.intervalId);
+    timedExerciseTimer.isRunning = false;
+  }
 
   if (appState.currentStepIndex > 0) {
     appState.currentStepIndex--;
@@ -1309,9 +1440,13 @@ function playerStepPrev() {
 function playerStepNext() {
   if (appState.isResting) {
     if (restTimer.intervalId) clearInterval(restTimer.intervalId);
+    restTimer.isRunning = false;
     appState.isResting = false;
   }
-  if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
+  if (timedExerciseTimer.intervalId) {
+    clearInterval(timedExerciseTimer.intervalId);
+    timedExerciseTimer.isRunning = false;
+  }
 
   if (appState.currentStepIndex < appState.linearSteps.length - 1) {
     appState.currentStepIndex++;
@@ -1322,14 +1457,39 @@ function playerStepNext() {
 }
 
 function quickSkipFinalSet() {
-  appState.linearSteps = appState.linearSteps.filter(step => {
-    return !(step.phaseSubtitle && step.phaseSubtitle.includes('EXERCISE 5'));
-  });
-  alert('Set 5 skipped to preserve your 45-minute budget! Advancing smoothly.');
-  if (appState.currentStepIndex >= appState.linearSteps.length) {
-    appState.currentStepIndex = appState.linearSteps.length - 1;
+  // 1. Terminate any active timers safely
+  if (restTimer.intervalId) {
+    clearInterval(restTimer.intervalId);
+    restTimer.isRunning = false;
   }
+  if (timedExerciseTimer.intervalId) {
+    clearInterval(timedExerciseTimer.intervalId);
+    timedExerciseTimer.isRunning = false;
+  }
+  appState.isResting = false;
+
+  // 2. Identify the active step before filtering
+  const activeStep = appState.linearSteps[appState.currentStepIndex];
+  const isCurrentlyInExercise5 = activeStep && (
+    (activeStep.phaseSubtitle && activeStep.phaseSubtitle.includes('EXERCISE 5')) ||
+    (activeStep.exerciseId && (activeStep.exerciseId.includes('farmer') || activeStep.exerciseId.includes('pallof') || activeStep.exerciseId.includes('suitcase')))
+  );
+
+  // 3. Filter out all Exercise 5 steps
+  appState.linearSteps = appState.linearSteps.filter(step => {
+    const isEx5 = (step.phaseSubtitle && step.phaseSubtitle.includes('EXERCISE 5')) ||
+                  (step.exerciseId && (step.exerciseId.includes('farmer') || step.exerciseId.includes('pallof') || step.exerciseId.includes('suitcase')));
+    return !isEx5;
+  });
+
+  // 4. Ensure currentStepIndex stays within valid bounds
+  if (appState.currentStepIndex >= appState.linearSteps.length) {
+    appState.currentStepIndex = Math.max(0, appState.linearSteps.length - 1);
+  }
+
+  // 5. Render smoothly
   renderCurrentPlayerStep();
+  alert('⚡ Exercise 5 (Carry / Core) skipped to preserve your 45-minute budget! Moving smoothly forward.');
 }
 
 function confirmExitWorkout() {
@@ -1337,6 +1497,10 @@ function confirmExitWorkout() {
     stopSessionClock();
     if (restTimer.intervalId) clearInterval(restTimer.intervalId);
     if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
+    restTimer.isRunning = false;
+    timedExerciseTimer.isRunning = false;
+    appState.isResting = false;
+    document.body.classList.remove('workout-active');
     document.getElementById('linearWorkoutView').classList.remove('active');
     document.getElementById('homeSetupView').style.display = 'block';
   }
@@ -1445,6 +1609,7 @@ function completeFullWorkout() {
 
   alert(`🎉 Workout Complete!\n• Time: ${totalMins} minutes (Target: 45m)\n• All weights and reps saved permanently.`);
 
+  document.body.classList.remove('workout-active');
   document.getElementById('linearWorkoutView').classList.remove('active');
   document.getElementById('homeSetupView').style.display = 'block';
   renderHomeExercisePreview();

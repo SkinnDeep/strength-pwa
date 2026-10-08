@@ -400,16 +400,37 @@ input:checked + .slider:before { transform: translateX(19px); }
   transform: scale(0.97);
 }
 
+/* When workout player is active, hide main header bar and bottom navigation */
+body.workout-active .header-bar,
+body.workout-active .bottom-nav {
+  display: none !important;
+}
+
+body.workout-active {
+  overflow: hidden;
+  height: 100dvh;
+}
+
+body.workout-active .content-area {
+  padding: 0;
+  max-width: 100%;
+  height: 100dvh;
+}
+
 /* ==========================================================================
    FITNESS APP PLAYER SCREEN (Matching User Screenshot Exactly)
    ========================================================================== */
 
 #linearWorkoutView {
   display: none;
+  height: 100dvh;
 }
 
 #linearWorkoutView.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
 }
 
 .player-card-shell {
@@ -419,6 +440,49 @@ input:checked + .slider:before { transform: translateX(19px); }
   overflow: hidden;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Exercise Real Media / Animated GIF Container */
+.exercise-media-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080d1a;
+  overflow: hidden;
+}
+
+.exercise-real-media {
+  width: 100%;
+  height: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  display: block;
+}
+
+.media-live-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(255, 87, 34, 0.4);
+  color: #ff7043;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* 1. Player Top Bar: Back Arrow, Segmented Dashes, Equipment Badge */
@@ -426,8 +490,12 @@ input:checked + .slider:before { transform: translateX(19px); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 8px;
+  padding: max(12px, var(--safe-top)) 16px 8px;
   gap: 12px;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
 }
 
 .player-back-btn {
@@ -479,32 +547,39 @@ input:checked + .slider:before { transform: translateX(19px); }
   font-size: 1.05rem;
 }
 
-/* 2. Visual Stage (Athletic Graphic with Orange Joint Dots) */
+/* 2. Visual Stage (Athletic Graphic or Live GIF) */
 .player-visual-stage {
   width: 100%;
-  background: #0d1422;
+  background: #080d1a;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   border-bottom: 1px solid var(--border-subtle);
-  min-height: 190px;
+  height: 220px;
+  min-height: 180px;
+  max-height: 240px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .exercise-svg {
   width: 100%;
-  height: auto;
+  height: 100%;
   max-height: 200px;
   display: block;
 }
 
-/* 3. Controls Sheet Area */
+/* 3. Controls Sheet Area (Scrolls independently if content overflows, preserving transport bar visibility) */
 .player-controls-sheet {
-  padding: 16px 20px 20px;
+  padding: 14px 18px max(14px, var(--safe-bottom));
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .player-step-subtitle {
