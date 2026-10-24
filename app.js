@@ -577,7 +577,15 @@ function updateSoundButtonUI() {
   const icon = document.getElementById('soundIcon');
   if (!btn || !icon) return;
   btn.classList.toggle('active', appState.soundEnabled);
-  icon.textContent = appState.soundEnabled ? '🔊' : '🔇';
+  icon.innerHTML = appState.soundEnabled ? `
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+    </svg>
+  ` : `
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+    </svg>
+  `;
 }
 
 // =============================================================================
@@ -619,7 +627,15 @@ function updateNotifButtonUI() {
   const icon = document.getElementById('notifIcon');
   if (!btn || !icon) return;
   btn.classList.toggle('active', appState.notificationsEnabled);
-  icon.textContent = appState.notificationsEnabled ? '🔔' : '🔕';
+  icon.innerHTML = appState.notificationsEnabled ? `
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+    </svg>
+  ` : `
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/><path d="M8.6 8.6a6 6 0 0 0 9.4 4.4c0 7 3 9 3 9H5.7"/>
+    </svg>
+  `;
 }
 
 function triggerTimerNotification(title, body) {
@@ -723,7 +739,15 @@ function updateWakeLockButton() {
   const icon = document.getElementById('wakeLockIcon');
   if (!btn || !icon) return;
   btn.classList.toggle('active', appState.screenAwake);
-  icon.textContent = appState.screenAwake ? '⚡' : '💤';
+  icon.innerHTML = appState.screenAwake ? `
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+  ` : `
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 2l20 20"/><path d="M13 2l-3.2 3.8"/><path d="M7.7 7.7L3 14h9l-1 8 4.2-5.4"/>
+    </svg>
+  `;
   btn.title = appState.screenAwake ? 'Screen Awake: ON' : 'Screen Awake: OFF';
 }
 
@@ -742,7 +766,15 @@ function applyTheme() {
   document.body.classList.toggle('light-theme', isLight);
   const themeIcon = document.getElementById('themeIcon');
   if (themeIcon) {
-    themeIcon.textContent = isLight ? '🌙' : '☀️';
+    themeIcon.innerHTML = isLight ? `
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+      </svg>
+    ` : `
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+      </svg>
+    `;
   }
   const themeBtn = document.getElementById('themeToggleBtn');
   if (themeBtn) {
@@ -1030,9 +1062,19 @@ function renderCurrentPlayerStep() {
   // 2. Equipment Badge
   const eqIcon = document.getElementById('equipmentIcon');
   if (step.equipment === 'bodyweight') {
-    eqIcon.innerHTML = `<span style="text-decoration: line-through; opacity: 0.8;">🏋️</span>`;
+    eqIcon.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+    `;
+    eqIcon.title = 'Bodyweight Exercise';
   } else {
-    eqIcon.innerHTML = `🏋️`;
+    eqIcon.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/>
+      </svg>
+    `;
+    eqIcon.title = `${step.equipment} required`;
   }
 
   // 3. Visual Stage (Real Demonstration Motion GIF / Photo with fallback)
@@ -1072,7 +1114,11 @@ function renderCurrentPlayerStep() {
   if (step.type === 'working_set' && !step.isTimed) {
     adjustBar.style.display = 'flex';
     actionText.textContent = 'DONE';
-    actionIcon.textContent = '✓';
+    actionIcon.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    `;
 
     const logged = appState.loggedStepData[appState.currentStepIndex];
     const currWeight = logged ? logged.weight : step.weight;
@@ -1087,7 +1133,11 @@ function renderCurrentPlayerStep() {
   } else if (step.isTimed) {
     adjustBar.style.display = 'none';
     actionText.textContent = 'START';
-    actionIcon.textContent = '▶';
+    actionIcon.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+    `;
     digitsEl.textContent = formatMinSec(step.durationSeconds);
     captionEl.textContent = step.digitsCaption || 'TIME REMAINING';
 
@@ -1096,7 +1146,11 @@ function renderCurrentPlayerStep() {
     // Checklist step
     adjustBar.style.display = 'none';
     actionText.textContent = 'DONE';
-    actionIcon.textContent = '✓';
+    actionIcon.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    `;
     digitsEl.textContent = step.digitsDisplay || 'READY';
     captionEl.textContent = step.digitsCaption || 'TAP DONE TO ADVANCE';
   }
@@ -1300,7 +1354,11 @@ function startRestPeriod(seconds) {
   document.getElementById('playerGiantDigits').textContent = formatMinSec(seconds);
 
   // Central Pill becomes SKIP REST
-  document.getElementById('playerMainActionIcon').textContent = '⏩';
+  document.getElementById('playerMainActionIcon').innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <polygon points="5 4 15 12 5 20 5 4"/><polygon points="19 5 19 19 17 19 17 5 19 5"/>
+    </svg>
+  `;
   document.getElementById('playerMainActionText').textContent = 'SKIP REST';
 
   // High-frequency tick (recalculating from Date.now() for 100% off-app accuracy)
@@ -1373,13 +1431,21 @@ function toggleTimedCountdown() {
     clearInterval(timedExerciseTimer.intervalId);
     timedExerciseTimer.isRunning = false;
     btnText.textContent = 'RESUME';
-    btnIcon.textContent = '▶';
+    btnIcon.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+    `;
   } else {
     // Start
     timedExerciseTimer.isRunning = true;
     timedExerciseTimer.endTime = Date.now() + timedExerciseTimer.remainingSeconds * 1000;
     btnText.textContent = 'PAUSE';
-    btnIcon.textContent = '⏸';
+    btnIcon.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+      </svg>
+    `;
     playTone(587.33, 'sine', 0.1, 0.2);
 
     if (timedExerciseTimer.intervalId) clearInterval(timedExerciseTimer.intervalId);
@@ -1658,7 +1724,7 @@ function renderHomeExercisePreview() {
       return `
         <div class="preview-row">
           <span>${i + 1}. <strong>${ex.name}</strong></span>
-          <span style="font-size: 0.78rem; color: #ff5722; font-weight: 700;">
+          <span class="preview-stat-chip">
             ${sets} × ${ex.repRange} (${weightDisplay})
           </span>
         </div>

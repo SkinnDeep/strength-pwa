@@ -1,114 +1,72 @@
 /* ==========================================================================
-   STRENGTH FOR FAMILY + HIKING PWA - COMMERCIAL FITNESS APP PLAYER STYLING
-   Directly matching Leap Fitness / Nike Training / Apple Fitness aesthetic
+   STRENGTH FOR FAMILY + HIKING PWA — STITCH SEMANTIC DESIGN SYSTEM
+   Alpine Athletic Studio Aesthetic | Strict Anti-Generic Standards
    ========================================================================== */
 
 :root {
-  --bg-app: #0a0e17;
+  /* Surface Tokens (Zinc / Slate Obsidian Base - No Pure Black #000) */
+  --bg-app: #090d16;
   --bg-card: #111827;
   --bg-card-elevated: #162032;
-  --bg-input: #0b111c;
+  --bg-surface: #1b263b;
+  --bg-input: #0c121e;
   
-  --primary-orange: #ff5722;
-  --primary-orange-glow: rgba(255, 87, 34, 0.35);
-  --primary-orange-subtle: rgba(255, 87, 34, 0.15);
+  /* Singular Vibrant Accent: Alpine Ember (<80% Saturation, High Energy) */
+  --accent-core: #ff5722;
+  --accent-core-hover: #f4511e;
+  --accent-core-glow: rgba(255, 87, 34, 0.28);
+  --accent-core-subtle: rgba(255, 87, 34, 0.12);
   
-  --accent-emerald: #10b981;
-  --accent-sky: #38bdf8;
-  --accent-amber: #fbbf24;
+  /* Telemetry / Status Accents */
+  --accent-trail: #10b981;
+  --accent-trail-subtle: rgba(16, 185, 129, 0.12);
+  --accent-glacier: #38bdf8;
+  --accent-glacier-subtle: rgba(56, 189, 248, 0.12);
+  --accent-warm: #f59e0b;
+  --accent-warm-subtle: rgba(245, 158, 11, 0.12);
   
-  --text-main: #ffffff;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
+  /* Typographic Contrast Hierarchy */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-subtle: #475569;
 
+  /* Glassmorphic Boundaries */
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-orange: rgba(255, 87, 34, 0.4);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-active: rgba(255, 87, 34, 0.38);
 
-  --radius-sm: 8px;
-  --radius-md: 14px;
+  /* Geometry */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
   --radius-lg: 24px;
   --radius-full: 9999px;
 
-  --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  /* Typography Stacks (Satoshi / Outfit / Apple SF Pro with Geist Mono Telemetry) */
+  --font-stack: "Outfit", "Satoshi", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "SF Mono", "Roboto Mono", ui-monospace, monospace;
   
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Light Mode Theme */
+/* Light Mode Calibration */
 body.light-theme {
   --bg-app: #f1f5f9;
   --bg-card: #ffffff;
   --bg-card-elevated: #f8fafc;
-  --bg-input: #f1f5f9;
+  --bg-surface: #e2e8f0;
+  --bg-input: #eef2f6;
   
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-dim: #64748b;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-subtle: #94a3b8;
 
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-orange: rgba(255, 87, 34, 0.5);
-}
-
-body.light-theme .header-bar {
-  background: rgba(241, 245, 249, 0.94);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-body.light-theme .brand-title {
-  color: #0f172a;
-}
-body.light-theme .icon-btn {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #475569;
-}
-body.light-theme .player-card-shell {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.08);
-}
-body.light-theme .player-visual-stage {
-  background: #f8fafc;
-  border-bottom-color: rgba(0, 0, 0, 0.06);
-}
-body.light-theme .player-exercise-title {
-  color: #0f172a;
-}
-body.light-theme .smart-tips-pill {
-  background: rgba(0, 0, 0, 0.04);
-  color: #334155;
-  border-color: rgba(0, 0, 0, 0.08);
-}
-body.light-theme .smart-tips-dropdown {
-  background: #f8fafc;
-  border-color: rgba(0, 0, 0, 0.08);
-}
-body.light-theme .smart-tips-dropdown ul {
-  color: #1e293b;
-}
-body.light-theme .chip-stepper span {
-  color: #0f172a;
-}
-body.light-theme .bottom-nav {
-  background: rgba(241, 245, 249, 0.94);
-  border-top-color: rgba(0, 0, 0, 0.08);
-}
-body.light-theme .home-workout-card {
-  background: #ffffff;
-}
-body.light-theme .home-title {
-  color: #0f172a;
-}
-body.light-theme .preview-row strong {
-  color: #0f172a;
-}
-body.light-theme .toggle-title {
-  color: #0f172a;
-}
-body.light-theme .modal-box {
-  background: #ffffff;
-}
-body.light-theme .modal-title {
-  color: #0f172a;
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-medium: rgba(15, 23, 42, 0.14);
+  --border-active: rgba(255, 87, 34, 0.45);
 }
 
 *, *::before, *::after {
@@ -116,22 +74,23 @@ body.light-theme .modal-title {
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
   font-family: var(--font-stack);
   background-color: var(--bg-app);
-  color: var(--text-main);
-  line-height: 1.4;
+  color: var(--text-primary);
+  line-height: 1.45;
   min-height: 100vh;
   min-height: -webkit-fill-available;
   padding-top: max(8px, var(--safe-top));
-  padding-bottom: calc(72px + max(10px, var(--safe-bottom)));
+  padding-bottom: calc(76px + max(12px, var(--safe-bottom)));
   overflow-x: hidden;
   user-select: none;
   -webkit-user-select: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s ease;
 }
 
 input, textarea, select {
@@ -142,24 +101,31 @@ input, textarea, select {
 }
 
 /* ==========================================================================
-   APP HEADER
+   APP HEADER BAR (Frosted Floating Island)
    ========================================================================== */
 
 .header-bar {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(10, 14, 23, 0.92);
+  background: rgba(9, 13, 22, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 10px 16px;
+  padding: 10px 18px;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+body.light-theme .header-bar {
+  background: rgba(241, 245, 249, 0.88);
 }
 
 .header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .brand-wrap {
@@ -168,53 +134,93 @@ input, textarea, select {
   gap: 10px;
 }
 
-.brand-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+.brand-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, rgba(255, 87, 34, 0.2), rgba(255, 87, 34, 0.05));
+  border: 1px solid var(--border-active);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-core);
+  flex-shrink: 0;
+}
+
+.brand-title-wrap {
+  display: flex;
+  flex-direction: column;
 }
 
 .brand-title {
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  letter-spacing: -0.01em;
-  color: #fff;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.brand-kicker {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-core);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .icon-btn {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  width: 36px;
-  height: 36px;
+  color: var(--text-secondary);
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.icon-btn svg {
+  width: 17px;
+  height: 17px;
+  display: block;
 }
 
 .icon-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.90);
 }
 
 .icon-btn.active {
-  color: var(--primary-orange);
-  border-color: var(--border-orange);
-  background: var(--primary-orange-subtle);
+  color: var(--accent-core);
+  border-color: var(--border-active);
+  background: var(--accent-core-subtle);
 }
 
-/* Container */
+body.light-theme .icon-btn {
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--text-secondary);
+}
+
+body.light-theme .icon-btn.active {
+  background: var(--accent-core-subtle);
+  color: var(--accent-core);
+}
+
+/* ==========================================================================
+   MAIN CONTENT AREA
+   ========================================================================== */
+
 .content-area {
-  padding: 12px 16px;
-  max-width: 480px;
+  padding: 14px 16px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
@@ -224,91 +230,153 @@ input, textarea, select {
 
 .tab-pane.active {
   display: block;
+  animation: fadeInPane 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInPane {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ==========================================================================
-   HOME SCREEN (Clean, Calm, Quick Launch)
+   VIEW A: PRE-WORKOUT SETUP (Sleek Tactical Dashboard)
    ========================================================================== */
 
+/* Day Switcher */
 .day-selector-group {
   display: flex;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 3px;
+  background: var(--bg-card);
+  padding: 4px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
-  margin-bottom: 14px;
-  gap: 3px;
+  margin-bottom: 16px;
+  gap: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .day-tab-btn {
   flex: 1;
   text-align: center;
-  padding: 9px 4px;
-  border-radius: 11px;
-  font-size: 0.86rem;
+  padding: 10px 4px;
+  border-radius: 12px;
+  font-size: 0.84rem;
   font-weight: 700;
-  color: var(--text-muted);
-  border: none;
+  letter-spacing: -0.01em;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
-  transition: all 0.16s ease;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .day-tab-btn.active {
-  background: var(--bg-card);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
+body.light-theme .day-tab-btn.active {
+  background: #ffffff;
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Hero Workout Card */
 .home-workout-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 22px 20px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
   margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.home-workout-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-core), transparent);
+  opacity: 0.85;
+}
+
+.home-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  gap: 12px;
 }
 
 .home-title {
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.home-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
 }
 
 .home-target-badge {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--primary-orange);
-  background: var(--primary-orange-subtle);
-  border: 1px solid var(--border-orange);
-  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-core);
+  background: var(--accent-core-subtle);
+  border: 1px solid var(--border-active);
+  padding: 5px 12px;
   border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
+/* Time Budget Pills */
 .home-breakdown-pills {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
-  margin: 12px 0 16px;
+  margin-bottom: 18px;
 }
 
 .breakdown-pill {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.04);
-  padding: 5px 9px;
-  border-radius: 8px;
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: var(--bg-input);
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
 }
 
+.breakdown-pill-val {
+  font-weight: 800;
+  color: var(--text-primary);
+  font-size: 0.76rem;
+  font-family: var(--font-mono);
+}
+
+/* 5-Exercise Preview List */
 .home-exercise-preview {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 18px;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--bg-input);
   padding: 12px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
@@ -317,21 +385,36 @@ input, textarea, select {
 .preview-row {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   font-size: 0.84rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.preview-row:last-child {
+  border-bottom: none;
 }
 
 .preview-row strong {
-  color: #fff;
-  font-weight: 600;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
+.preview-stat-chip {
+  font-size: 0.76rem;
+  color: var(--accent-core);
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+/* Intro Phase Toggle */
 .intro-toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 10px 14px;
+  background: var(--bg-input);
+  padding: 12px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
   margin-bottom: 18px;
@@ -339,68 +422,137 @@ input, textarea, select {
 
 .toggle-title {
   font-size: 0.84rem;
-  font-weight: 600;
-  color: var(--text-main);
+  font-weight: 700;
+  color: var(--text-primary);
   display: block;
 }
 
 .toggle-hint {
   font-size: 0.72rem;
-  color: var(--text-dim);
+  color: var(--text-tertiary);
+  margin-top: 2px;
 }
 
+/* Switch */
 .switch {
   position: relative;
   display: inline-block;
   width: 44px;
-  height: 25px;
+  height: 24px;
+  flex-shrink: 0;
 }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider {
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #334155;
-  transition: .22s;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  transition: 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   border-radius: 34px;
 }
 .slider:before {
   position: absolute;
   content: "";
-  height: 19px;
-  width: 19px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .22s;
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--text-primary);
+  transition: 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
-input:checked + .slider { background-color: var(--primary-orange); }
-input:checked + .slider:before { transform: translateX(19px); }
+input:checked + .slider {
+  background-color: var(--accent-core);
+  border-color: var(--accent-core);
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
 
+/* Big Start Button */
 .big-start-btn {
   width: 100%;
   background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
-  color: #fff;
-  font-size: 1.15rem;
+  color: #ffffff;
+  font-size: 1.08rem;
   font-weight: 800;
+  letter-spacing: -0.01em;
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   cursor: pointer;
-  box-shadow: 0 6px 24px var(--primary-orange-glow);
-  transition: transform 0.15s ease;
+  box-shadow: 0 8px 24px var(--accent-core-glow);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
 }
 
 .big-start-btn:active {
   transform: scale(0.97);
+  box-shadow: 0 4px 12px var(--accent-core-glow);
 }
 
-/* When workout player is active, hide main header bar and bottom navigation */
+/* Weekly Cardio Hero Card */
+.hiking-hero-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.hiking-goal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.hiking-card-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hiking-minutes-big {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  letter-spacing: -0.03em;
+}
+
+.hiking-progress-track {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-input);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-subtle);
+}
+
+.hiking-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff5722 0%, #ff8a65 100%);
+  border-radius: var(--radius-full);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   VIEW B: COMMERCIAL FITNESS APP PLAYER SCREEN (Stitch Modernized)
+   ========================================================================== */
+
 body.workout-active .header-bar,
 body.workout-active .bottom-nav {
   display: none !important;
@@ -417,10 +569,6 @@ body.workout-active .content-area {
   height: 100dvh;
 }
 
-/* ==========================================================================
-   FITNESS APP PLAYER SCREEN (Matching User Screenshot Exactly)
-   ========================================================================== */
-
 #linearWorkoutView {
   display: none;
   height: 100dvh;
@@ -436,9 +584,8 @@ body.workout-active .content-area {
 .player-card-shell {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -449,7 +596,101 @@ body.workout-active .content-area {
   margin: 0 auto;
 }
 
-/* Exercise Real Media / Animated GIF Container */
+@media (min-width: 520px) {
+  .player-card-shell {
+    border-radius: var(--radius-lg);
+    height: calc(100dvh - 32px);
+    max-height: 840px;
+    margin: 16px auto;
+  }
+}
+
+/* Top Bar: Back button, Segmented dashes, Equipment pill */
+.player-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(14px, var(--safe-top)) 18px 10px;
+  gap: 12px;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.player-back-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.player-back-btn:active {
+  transform: scale(0.90);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.segmented-progress-bar {
+  flex: 1;
+  display: flex;
+  gap: 3.5px;
+  align-items: center;
+}
+
+.segment-dash {
+  flex: 1;
+  height: 4.5px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.segment-dash.completed {
+  background: var(--accent-core);
+}
+
+.segment-dash.active {
+  background: var(--accent-core);
+  box-shadow: 0 0 10px var(--accent-core-glow);
+  transform: scaleY(1.4);
+}
+
+.equipment-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border-active);
+  background: var(--accent-core-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* 2. Visual Stage (Athletic Graphic or Live GIF) */
+.player-visual-stage {
+  width: 100%;
+  background: #080d1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-bottom: 1px solid var(--border-subtle);
+  height: 220px;
+  min-height: 180px;
+  max-height: 240px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
 .exercise-media-wrapper {
   position: relative;
   width: 100%;
@@ -469,100 +710,6 @@ body.workout-active .content-area {
   display: block;
 }
 
-.media-live-badge {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  background: rgba(15, 23, 42, 0.82);
-  border: 1px solid rgba(255, 87, 34, 0.4);
-  color: #ff7043;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  padding: 3px 8px;
-  border-radius: 6px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-/* 1. Player Top Bar: Back Arrow, Segmented Dashes, Equipment Badge */
-.player-top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: max(12px, var(--safe-top)) 16px 8px;
-  gap: 12px;
-  flex-shrink: 0;
-  background: var(--bg-card);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-}
-
-.player-back-btn {
-  background: transparent;
-  border: none;
-  color: #fff;
-  font-size: 1.3rem;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.segmented-progress-bar {
-  flex: 1;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.segment-dash {
-  flex: 1;
-  height: 4.5px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 2px;
-  transition: all 0.25s ease;
-}
-
-.segment-dash.completed {
-  background: #ff5722;
-}
-
-.segment-dash.active {
-  background: #ff7043;
-  box-shadow: 0 0 8px var(--primary-orange-glow);
-  transform: scaleY(1.3);
-}
-
-.equipment-badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 2.5px solid #ff5722;
-  background: rgba(255, 87, 34, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.05rem;
-}
-
-/* 2. Visual Stage (Athletic Graphic or Live GIF) */
-.player-visual-stage {
-  width: 100%;
-  background: #080d1a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  border-bottom: 1px solid var(--border-subtle);
-  height: 220px;
-  min-height: 180px;
-  max-height: 240px;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
 .exercise-svg {
   width: 100%;
   height: 100%;
@@ -570,9 +717,25 @@ body.workout-active .content-area {
   display: block;
 }
 
-/* 3. Controls Sheet Area (Scrolls independently if content overflows, preserving transport bar visibility) */
+.media-live-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(9, 13, 22, 0.85);
+  border: 1px solid var(--border-active);
+  color: var(--accent-core);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* 3. Controls Sheet Area (Independent smooth scrolling) */
 .player-controls-sheet {
-  padding: 14px 18px max(14px, var(--safe-bottom));
+  padding: 16px 20px max(14px, var(--safe-bottom));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -584,73 +747,76 @@ body.workout-active .content-area {
 
 .player-step-subtitle {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--text-tertiary);
   letter-spacing: 0.08em;
   margin-bottom: 4px;
 }
 
 .player-exercise-title {
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   font-weight: 900;
-  color: #fff;
-  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
   text-transform: uppercase;
   margin-bottom: 6px;
+  line-height: 1.15;
 }
 
-/* 4. Giant Hero Digits (Bold Orange like Screenshot) */
+/* Hero Digits */
 .player-giant-digits {
-  font-size: 3.8rem;
+  font-size: clamp(3.2rem, 10vw, 4.2rem);
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-  color: #ff5722;
+  font-family: var(--font-mono);
+  color: var(--accent-core);
   line-height: 1;
   letter-spacing: -0.04em;
   margin: 6px 0 2px;
-  text-shadow: 0 0 20px rgba(255, 87, 34, 0.3);
+  text-shadow: 0 0 24px var(--accent-core-glow);
 }
 
 .player-digits-caption {
-  font-size: 0.8rem;
+  font-size: 0.80rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   margin-bottom: 14px;
 }
 
-/* 5. Smart Tips Pill (Matching screenshot top/pill) */
+/* Smart Tips Pill */
 .smart-tips-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   padding: 6px 14px;
   font-size: 0.78rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   cursor: pointer;
   margin-bottom: 14px;
-  max-width: 90%;
+  max-width: 95%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .smart-tips-pill:active {
   background: rgba(255, 255, 255, 0.12);
+  transform: scale(0.98);
 }
 
 .smart-tips-dropdown {
   display: none;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 10px 14px;
+  padding: 12px 16px;
   margin-bottom: 14px;
   text-align: left;
   width: 100%;
@@ -658,6 +824,7 @@ body.workout-active .content-area {
 
 .smart-tips-dropdown.open {
   display: block;
+  animation: fadeInPane 0.2s ease forwards;
 }
 
 .smart-tips-dropdown ul {
@@ -665,82 +832,23 @@ body.workout-active .content-area {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 0.8rem;
-  color: #e2e8f0;
+  font-size: 0.82rem;
+  color: var(--text-primary);
 }
 
 .smart-tips-dropdown li::before {
   content: "• ";
-  color: #ff5722;
+  color: var(--accent-core);
   font-weight: bold;
 }
 
-/* 6. Quick Weight / Rep Stepper Chips */
-.quick-adjust-bar {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 18px;
-}
-
-.adjust-chip {
-  flex: 1;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.adjust-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 4px;
-}
-
-.chip-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.chip-stepper button {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-subtle);
-  color: #fff;
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.chip-stepper button:active {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.chip-stepper span {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #fff;
-}
-
-/* Next Exercise Preview Box during Rest */
+/* Next Exercise Preview Card (Rest Period) */
 .next-exercise-preview-card {
   width: 100%;
-  background: rgba(255, 87, 34, 0.08);
-  border: 1px solid rgba(255, 87, 34, 0.35);
+  background: linear-gradient(135deg, rgba(255, 87, 34, 0.12), rgba(17, 24, 39, 0.9));
+  border: 1px solid var(--border-active);
   border-radius: var(--radius-md);
-  padding: 12px 14px;
+  padding: 14px 16px;
   margin-bottom: 14px;
   text-align: left;
   display: flex;
@@ -752,18 +860,15 @@ body.workout-active .content-area {
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #ff5722;
+  color: var(--accent-core);
   letter-spacing: 0.08em;
 }
 
 .next-preview-title {
-  font-size: 1.15rem;
+  font-size: 1.18rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-primary);
   letter-spacing: -0.01em;
-}
-body.light-theme .next-preview-title {
-  color: #0f172a;
 }
 
 .next-preview-stats {
@@ -772,8 +877,9 @@ body.light-theme .next-preview-title {
   gap: 8px;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #fbbf24;
+  color: var(--accent-warm);
   margin: 2px 0;
+  font-family: var(--font-mono);
 }
 
 .next-preview-stats span {
@@ -782,15 +888,10 @@ body.light-theme .next-preview-title {
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
-body.light-theme .next-preview-stats span {
-  background: rgba(255, 255, 255, 0.9);
-  color: #b45309;
-  border-color: rgba(0, 0, 0, 0.08);
-}
 
 .next-preview-cue {
   font-size: 0.76rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   line-height: 1.35;
 }
 
@@ -802,76 +903,140 @@ body.light-theme .next-preview-stats span {
 }
 
 .rest-adjust-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-subtle);
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 6px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  padding: 8px 18px;
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 .rest-adjust-btn:active {
   transform: scale(0.92);
   background: rgba(255, 255, 255, 0.18);
 }
-body.light-theme .rest-adjust-btn {
-  background: rgba(0, 0, 0, 0.06);
-  color: #0f172a;
-  border-color: rgba(0, 0, 0, 0.08);
+
+/* Quick Weight / Rep Stepper Chips */
+.quick-adjust-bar {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 18px;
 }
 
-/* 7. Transport Bar (Matching |<  [ || ]  >| from user screenshot) */
+.adjust-chip {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.adjust-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.chip-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.chip-stepper button {
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  color: var(--text-primary);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  font-size: 1.15rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.chip-stepper button:active {
+  transform: scale(0.90);
+  background: var(--accent-core-subtle);
+  border-color: var(--border-active);
+  color: var(--accent-core);
+}
+
+.chip-stepper span {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* 7. Transport Dock (|◀   [ ✓ DONE / || ]   ▶|) */
 .player-transport-bar {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 20px;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .transport-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.15s ease, color 0.15s ease;
-}
-
-.transport-btn:active {
-  transform: scale(0.88);
-  color: #fff;
-}
-
-/* Big Central Pill Action Button (Matches Orange Pause/Play Pill in screenshot) */
-.transport-pill-main {
-  background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
-  color: #fff;
-  border: none;
-  height: 52px;
-  padding: 0 32px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 1.15rem;
-  font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 6px 20px var(--primary-orange-glow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  min-width: 140px;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+}
+
+.transport-btn:active {
+  transform: scale(0.90);
+  color: var(--text-primary);
+}
+
+.transport-pill-main {
+  background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+  color: #ffffff;
+  border: none;
+  height: 54px;
+  padding: 0 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 8px 24px var(--accent-core-glow);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+  min-width: 150px;
 }
 
 .transport-pill-main:active {
   transform: scale(0.95);
+  box-shadow: 0 4px 12px var(--accent-core-glow);
 }
 
 /* Footer Session Clock */
@@ -880,14 +1045,15 @@ body.light-theme .rest-adjust-btn {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  font-size: 0.76rem;
-  color: var(--text-dim);
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
   padding-top: 10px;
   border-top: 1px solid var(--border-subtle);
 }
 
 .player-footer-clock strong {
-  color: var(--text-muted);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
 }
 
 .skip-set-link {
@@ -895,80 +1061,53 @@ body.light-theme .rest-adjust-btn {
   border: none;
   color: #fda4af;
   font-size: 0.74rem;
+  font-weight: 700;
   cursor: pointer;
   text-decoration: underline;
+  padding: 4px;
 }
 
 /* ==========================================================================
-   OTHER TABS (Hikes & History)
+   OTHER TABS (HIKES & HISTORY)
    ========================================================================== */
 
-.hiking-hero-card {
-  background: linear-gradient(135deg, rgba(255, 87, 34, 0.15), rgba(244, 81, 30, 0.05));
-  border: 1px solid var(--border-orange);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  margin-bottom: 16px;
-}
-
-.hiking-goal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 10px;
-}
-
-.hiking-minutes-big {
-  font-size: 2rem;
-  font-weight: 900;
-  color: #fff;
-}
-
-.hiking-progress-track {
-  width: 100%;
-  height: 9px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.hiking-progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #ff5722, #ff8a65);
-  border-radius: 5px;
-  transition: width 0.4s ease;
-}
-
 .outdoor-log-item {
-  background: var(--bg-card);
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 12px 14px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: transform 0.15s ease;
 }
 
 .nav-step-btn {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 0.84rem;
-  font-weight: 600;
+  font-weight: 700;
   padding: 10px 16px;
   border-radius: var(--radius-md);
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
+.nav-step-btn:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+/* Modal Windows */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.84);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(4, 7, 13, 0.86);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   z-index: 100;
   display: none;
   align-items: center;
@@ -979,36 +1118,42 @@ body.light-theme .rest-adjust-btn {
 .modal-overlay.active { display: flex; }
 
 .modal-box {
-  background: #111827;
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   max-width: 460px;
   width: 100%;
   max-height: 85vh;
   overflow-y: auto;
-  padding: 20px;
+  padding: 24px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+  animation: fadeInPane 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .modal-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
-/* Bottom Nav */
+/* ==========================================================================
+   BOTTOM NAVIGATION BAR (Tactile Floating Island)
+   ========================================================================== */
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(10, 14, 23, 0.94);
+  background: rgba(9, 13, 22, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid var(--border-subtle);
@@ -1017,26 +1162,49 @@ body.light-theme .rest-adjust-btn {
   padding-top: 8px;
   padding-bottom: max(10px, var(--safe-bottom));
   z-index: 60;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+body.light-theme .bottom-nav {
+  background: rgba(241, 245, 249, 0.94);
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   background: transparent;
   border: none;
-  color: var(--text-dim);
+  color: var(--text-tertiary);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   cursor: pointer;
   flex: 1;
+  padding: 4px 0;
+  transition: all 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.nav-item.active {
-  color: #ff5722;
+.nav-item:active {
+  transform: scale(0.92);
 }
 
 .nav-icon {
-  font-size: 1.25rem;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-item.active {
+  color: var(--accent-core);
+}
+
+.nav-item.active .nav-icon {
+  transform: translateY(-2px);
+  color: var(--accent-core);
 }
